@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 function App() {
-  const [messages, setMessages] = useState([]);
   const ws = useRef(null);
 
   useEffect(() => {
@@ -12,7 +11,7 @@ function App() {
     };
 
     ws.current.onmessage = (event) => {
-      setMessages((prev) => [...prev, event.data]);
+      console.log(event.data);
     };
 
     ws.current.onclose = () => {
@@ -29,21 +28,9 @@ function App() {
   }, []);
 
   return (
-    <div style={{ padding: "1rem", fontFamily: "monospace" }}>
-      <h2>Seismologos User Messages</h2>
-      <div
-        style={{
-          height: "400px",
-          overflowY: "scroll",
-          border: "1px solid #ccc",
-          padding: "0.5rem",
-          backgroundColor: "#f9f9f9",
-        }}
-      >
-        {messages.map((msg, i) => (
-          <div key={i}>{msg}</div>
-        ))}
-      </div>
+    <div>
+      <h2>Seismologos User Messages (check console)</h2>
+      <p>Open the browser console to see incoming WebSocket messages.</p>
     </div>
   );
 }
