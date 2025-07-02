@@ -1,37 +1,41 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
+import { WebSocketProvider, useWebSocket } from "./contexts/WebSocketProvider";
+import "./styles.css";
 
-function App() {
-  const ws = useRef(null);
+function Overlay() {
+  const { connected, overlayText } = useWebSocket();
 
-  useEffect(() => {
-    ws.current = new WebSocket("wss://seismologos.shop/ws/user");
+  if (connected) return null;
 
-    ws.current.onopen = () => {
-      console.log("WebSocket connected");
-    };
+  return (
+    <div className="overlay">
+      {overlayText || "Connecting to server..."}  
+    </div>
+  );
+}
 
-    ws.current.onmessage = (event) => {
-      console.log(event.data);
-    };
-
-    ws.current.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
-
-    ws.current.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    return () => {
-      if (ws.current) ws.current.close();
-    };
-  }, []);
+function AppContent() {
+  const { lastMessage } = useWebSocket();
 
   return (
     <div>
       <h2>Seismologos User Messages (check console)</h2>
       <p>Open the browser console to see incoming WebSocket messages.</p>
+      {lastMessage && (
+        <div>
+          <strong>Last Message:</strong> {lastMessage}
+        </div>
+      )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <WebSocketProvider>
+      <AppContent />
+      <Overlay />
+    </WebSocketProvider>
   );
 }
 
