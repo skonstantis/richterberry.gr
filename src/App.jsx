@@ -1,5 +1,6 @@
 import React from "react";
 import { WebSocketProvider, useWebSocket } from "./contexts/WebSocketProvider";
+import { SimpleLinePlot } from "./components/SimpleLinePlot"
 import "./styles.css";
 
 function Overlay() {
@@ -15,17 +16,13 @@ function Overlay() {
 }
 
 function AppContent() {
-  const { lastMessage } = useWebSocket();
+  const { lastMessage, plotSamples, connected, getVirtualTimeNow } = useWebSocket();
 
   return (
     <div>
-      <h2>Seismologos User Messages (check console)</h2>
-      <p>Open the browser console to see incoming WebSocket messages.</p>
-      {lastMessage && (
-        <div>
-          <strong>Last Message:</strong> {lastMessage}
-        </div>
-      )}
+      <h2>Seismograph Plot (Last 30 sec)</h2>
+      {!connected && <p>Disconnected...</p>}
+      <SimpleLinePlot samples={plotSamples} getVirtualTimeNow={getVirtualTimeNow} />
     </div>
   );
 }

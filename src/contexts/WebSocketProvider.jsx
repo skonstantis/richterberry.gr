@@ -12,10 +12,18 @@ export function WebSocketProvider({ children }) {
   const reconnectAttempts = useRef(0);
   const isManuallyClosed = useRef(false);
 
-  const MAX_RECONNECT_DELAY = 30000; 
+  const max_reconnect_delay = 30000;
+  const bufferSizeMs = 30000;
 
   const [connected, setConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState(null);
+  const [samples, setSamples] = useState([]);
+  const [plotSamples, setPlotSamples] = useState([]);
+
+  const bufferRef = useRef([]);
+
+  const virtualTimeBaseRef = useRef(null);          
+  const lastSyncMonotonicRef = useRef(null);      
 
   const connectWebSocket = () => {
     if (
@@ -35,7 +43,59 @@ export function WebSocketProvider({ children }) {
 
       ws.current.onmessage = (event) => {
         setLastMessage(event.data);
-        console.log("WS message:", event.data);
+
+        try {
+          const packet = JSON.parse(event.data);
+
+          if (!packet.samples || !Array.isArray(packet.samples)) {
+            console.warn("Received packet without samples", packet);
+            return;
+          }
+
+          if (packet.sample_rate > 0 && packet.samples.length > 0) {
+            const batchDurationMs = (packet.samples.length / packet.sample_rate) * 1000;
+            const batchStartMs = new Date(packet.timestamp_start).getTime();
+            const batchEndMs = batchStartMs + batchDurationMs;
+
+            const oldVirtualTimeBase = virtualTimeBaseRef.current;
+
+            if (oldVirtualTimeBase !== null && batchEndMs < oldVirtualTimeBase) {
+              console.log(`[INFO] GPS time moved backward: ${new Date(oldVirtualTimeBase).toISOString()} → ${new Date(batchEndMs).toISOString()}`);
+            }
+
+            virtualTimeBaseRef.current = batchEndMs;
+            lastSyncMonotonicRef.current = performance.now();
+
+            console.log(`[GPS SYNC] virtualTimeBase=${new Date(batchEndMs).toISOString()}, monotonic=${lastSyncMonotonicRef.current.toFixed(2)}ms`);
+          }
+
+          const incomingSamples = packet.samples.map(s => ({
+            timestamp: s.timestamp * 1000, 
+            value: s.value,
+          }));
+
+          const buffer = bufferRef.current;
+
+          const maxBufferTimestamp = buffer.length > 0 ? buffer[buffer.length - 1].timestamp : -Infinity;
+
+          const firstNewSampleIndex = incomingSamples.findIndex(s => s.timestamp > maxBufferTimestamp);
+
+          if (firstNewSampleIndex === -1) {
+            console.log(`Incoming batch fully overlaps buffer, ignoring`);
+            return;
+          }
+
+          const trimmedSamples = incomingSamples.slice(firstNewSampleIndex);
+
+          bufferRef.current = buffer.concat(trimmedSamples);
+
+          console.log(
+            `Received ${incomingSamples.length} samples, trimmed to ${trimmedSamples.length}, buffer size now ${bufferRef.current.length}`
+          );
+
+        } catch (e) {
+          console.error("Failed to parse WebSocket message:", e);
+        }
       };
 
       ws.current.onclose = () => {
@@ -62,7 +122,7 @@ export function WebSocketProvider({ children }) {
 
     const delay = Math.min(
       3000 * 2 ** reconnectAttempts.current,
-      MAX_RECONNECT_DELAY
+      max_reconnect_delay
     );
     console.log(`Reconnecting in ${delay / 1000} seconds...`);
 
@@ -83,6 +143,28 @@ export function WebSocketProvider({ children }) {
     }
   };
 
+  const getVirtualTimeNow = () => {
+    if (virtualTimeBaseRef.current === null || lastSyncMonotonicRef.current === null) {
+      return null;
+    }
+    const elapsed = performance.now() - lastSyncMonotonicRef.current;
+    return virtualTimeBaseRef.current + elapsed;
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const nowVirtualTime = getVirtualTimeNow();
+      if (nowVirtualTime !== null) {
+        bufferRef.current = bufferRef.current.filter(
+          sample => sample.timestamp >= nowVirtualTime - bufferSizeMs
+        );
+      }
+      setSamples([...bufferRef.current]);
+    }, 100); 
+
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     connectWebSocket();
 
@@ -90,6 +172,9 @@ export function WebSocketProvider({ children }) {
       if (document.visibilityState === "hidden") {
         console.log("Tab hidden, disconnecting WebSocket...");
         disconnectWebSocket();
+        //clear the buffer
+        bufferRef.current = [];       
+        setSamples([]);   
       } else if (document.visibilityState === "visible") {
         console.log("Tab visible, reconnecting WebSocket...");
         connectWebSocket();
@@ -104,8 +189,22 @@ export function WebSocketProvider({ children }) {
     };
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const nowVirtualTime = getVirtualTimeNow();
+      if (nowVirtualTime !== null) {
+        const filtered = bufferRef.current.filter(
+          sample => sample.timestamp >= nowVirtualTime - bufferSizeMs
+        );
+        setPlotSamples(filtered);
+      }
+    }, 33);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <WebSocketContext.Provider value={{ connected, lastMessage }}>
+    <WebSocketContext.Provider value={{ connected, lastMessage, samples, plotSamples, getVirtualTimeNow }}>
       {children}
     </WebSocketContext.Provider>
   );
