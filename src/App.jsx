@@ -16,13 +16,13 @@ function Overlay() {
 }
 
 function AppContent() {
-  const { lastMessage, plotSamples, connected, getVirtualTimeNow } = useWebSocket();
+  const { connected, samples, getVirtualTimeNow } = useWebSocket();
 
   return (
     <div>
       <h2>Seismograph Plot (Last 30 sec)</h2>
       {!connected && <p>Disconnected...</p>}
-      <SimpleLinePlot samples={plotSamples} getVirtualTimeNow={getVirtualTimeNow} />
+      <SimpleLinePlot samples={samples} getVirtualTimeNow={getVirtualTimeNow} />
     </div>
   );
 }

@@ -16,14 +16,12 @@ export function WebSocketProvider({ children }) {
   const bufferSizeMs = 30000;
 
   const [connected, setConnected] = useState(false);
-  const [lastMessage, setLastMessage] = useState(null);
   const [samples, setSamples] = useState([]);
-  const [plotSamples, setPlotSamples] = useState([]);
 
   const bufferRef = useRef([]);
 
-  const virtualTimeBaseRef = useRef(null);          
-  const lastSyncMonotonicRef = useRef(null);      
+  const virtualTimeBaseRef = useRef(null);
+  const lastSyncMonotonicRef = useRef(null);
 
   const connectWebSocket = () => {
     if (
@@ -42,8 +40,6 @@ export function WebSocketProvider({ children }) {
       };
 
       ws.current.onmessage = (event) => {
-        setLastMessage(event.data);
-
         try {
           const packet = JSON.parse(event.data);
 
@@ -58,7 +54,7 @@ export function WebSocketProvider({ children }) {
             const batchEndMs = batchStartMs + batchDurationMs;
 
             const oldVirtualTimeBase = virtualTimeBaseRef.current;
-
+            
             if (oldVirtualTimeBase !== null && batchEndMs < oldVirtualTimeBase) {
               console.log(`[INFO] GPS time moved backward: ${new Date(oldVirtualTimeBase).toISOString()} → ${new Date(batchEndMs).toISOString()}`);
             }
@@ -70,29 +66,25 @@ export function WebSocketProvider({ children }) {
           }
 
           const incomingSamples = packet.samples.map(s => ({
-            timestamp: s.timestamp * 1000, 
+            timestamp: s.timestamp * 1000,
             value: s.value,
           }));
 
           const buffer = bufferRef.current;
-
           const maxBufferTimestamp = buffer.length > 0 ? buffer[buffer.length - 1].timestamp : -Infinity;
 
           const firstNewSampleIndex = incomingSamples.findIndex(s => s.timestamp > maxBufferTimestamp);
-
           if (firstNewSampleIndex === -1) {
             console.log(`Incoming batch fully overlaps buffer, ignoring`);
             return;
           }
 
           const trimmedSamples = incomingSamples.slice(firstNewSampleIndex);
-
           bufferRef.current = buffer.concat(trimmedSamples);
 
           console.log(
             `Received ${incomingSamples.length} samples, trimmed to ${trimmedSamples.length}, buffer size now ${bufferRef.current.length}`
           );
-
         } catch (e) {
           console.error("Failed to parse WebSocket message:", e);
         }
@@ -120,10 +112,7 @@ export function WebSocketProvider({ children }) {
       clearTimeout(reconnectTimer.current);
     }
 
-    const delay = Math.min(
-      3000 * 2 ** reconnectAttempts.current,
-      max_reconnect_delay
-    );
+    const delay = Math.min(3000 * 2 ** reconnectAttempts.current, max_reconnect_delay);
     console.log(`Reconnecting in ${delay / 1000} seconds...`);
 
     reconnectTimer.current = setTimeout(() => {
@@ -172,9 +161,8 @@ export function WebSocketProvider({ children }) {
       if (document.visibilityState === "hidden") {
         console.log("Tab hidden, disconnecting WebSocket...");
         disconnectWebSocket();
-        //clear the buffer
-        bufferRef.current = [];       
-        setSamples([]);   
+        bufferRef.current = [];
+        setSamples([]);
       } else if (document.visibilityState === "visible") {
         console.log("Tab visible, reconnecting WebSocket...");
         connectWebSocket();
@@ -189,22 +177,8 @@ export function WebSocketProvider({ children }) {
     };
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const nowVirtualTime = getVirtualTimeNow();
-      if (nowVirtualTime !== null) {
-        const filtered = bufferRef.current.filter(
-          sample => sample.timestamp >= nowVirtualTime - bufferSizeMs
-        );
-        setPlotSamples(filtered);
-      }
-    }, 33);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <WebSocketContext.Provider value={{ connected, lastMessage, samples, plotSamples, getVirtualTimeNow }}>
+    <WebSocketContext.Provider value={{ connected, samples, getVirtualTimeNow }}>
       {children}
     </WebSocketContext.Provider>
   );
