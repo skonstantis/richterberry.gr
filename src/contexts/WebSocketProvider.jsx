@@ -66,7 +66,7 @@ export function WebSocketProvider({ children }) {
             setVirtualTimeBase(batchEndMs);
       
             let intervalCount = 1;  
-            const delay = 100;
+            const delay = 200;
             
             intervalRef.current = setInterval(() => {
               setVirtualTimeBase(batchEndMs + delay * intervalCount);
