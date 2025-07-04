@@ -1,33 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-export function SimpleLinePlot({ samples, getVirtualTimeNow, width = 600, height = 200 }) {
+export function SimpleLinePlot({
+  samples,
+  virtualTimeBase,
+  width = 600,
+  height = 200,
+}) {
   const bufferSizeMs = 30000; // 30 seconds window
 
-  // Dummy state to trigger re-render
-  const [frameCount, setFrameCount] = useState(0);
-
-  useEffect(() => {
-    let animationFrameId;
-    let lastTimestamp = performance.now();
-
-    const loop = (timestamp) => {
-      // Calculate elapsed time since last update
-      const elapsed = timestamp - lastTimestamp;
-
-      // Only update ~30fps (every ~33ms)
-      if (elapsed > 33) {
-        setFrameCount((count) => count + 1);
-        lastTimestamp = timestamp;
-      }
-      animationFrameId = requestAnimationFrame(loop);
-    };
-
-    animationFrameId = requestAnimationFrame(loop);
-
-    return () => cancelAnimationFrame(animationFrameId);
-  }, []);
-
-  if (!samples || !samples.length) {
+  virtualTimeBase += 500;
+  // If no virtual time, show waiting message
+  if (!virtualTimeBase) {
     return (
       <div
         style={{
@@ -37,25 +20,8 @@ export function SimpleLinePlot({ samples, getVirtualTimeNow, width = 600, height
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-        }}
-      >
-        No data to display
-      </div>
-    );
-  }
-
-  const virtualTimeNow = getVirtualTimeNow();
-
-  if (!virtualTimeNow) {
-    return (
-      <div
-        style={{
-          width,
-          height,
-          border: "1px solid black",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          fontFamily: "sans-serif",
+          fontSize: "14px",
         }}
       >
         Waiting for virtual time...
@@ -63,53 +29,95 @@ export function SimpleLinePlot({ samples, getVirtualTimeNow, width = 600, height
     );
   }
 
-  // Define the visible time window edges
-  const xMin = virtualTimeNow - bufferSizeMs;
-  const xMax = virtualTimeNow;
+  const xMin = virtualTimeBase - bufferSizeMs;
+  const xMax = virtualTimeBase;
 
-  // Filter samples to only those in the visible window
-  const visibleSamples = samples.filter(
+  const visibleSamples = samples?.filter(
     (s) => s.timestamp >= xMin && s.timestamp <= xMax
-  );
+  ) ?? [];
 
-  if (visibleSamples.length === 0) {
-    return (
-      <div
-        style={{
-          width,
-          height,
-          border: "1px solid black",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        No samples in last 30 seconds
-      </div>
-    );
-  }
-
-  // Extract min and max values from visible samples for Y-axis scaling
+  // Prepare Y scaling
   const values = visibleSamples.map((s) => s.value);
-  const yMin = Math.min(...values);
-  const yMax = Math.max(...values);
+  const maxAbs = Math.max(...values.map(Math.abs), 1);
+  const yMin = -maxAbs;
+  const yMax = maxAbs;
 
-  // Protect against zero range in Y axis
-  const yRange = yMax - yMin || 1;
-
-  // Scale functions
   const scaleX = (t) => ((t - xMin) / (xMax - xMin)) * width;
-  const scaleY = (v) => height - ((v - yMin) / yRange) * height;
+  const scaleY = (v) => ((yMax - v) / (yMax - yMin)) * height;
 
-  // Construct points string for SVG polyline
   const points = visibleSamples
     .map((s) => `${scaleX(s.timestamp)},${scaleY(s.value)}`)
     .join(" ");
 
+  // Grid lines vertical (time)
+  const gridLines = [];
+  const timeGridStep = 5000; // 5 seconds
+  for (let t = Math.ceil(xMin / timeGridStep) * timeGridStep; t <= xMax; t += timeGridStep) {
+    const x = scaleX(t);
+    gridLines.push(
+      <line
+        key={`v-${t}`}
+        x1={x}
+        x2={x}
+        y1={0}
+        y2={height}
+        stroke="#ccc"
+        strokeDasharray="2,2"
+      />
+    );
+  }
+
+  // Horizontal axis (Y=0)
+  gridLines.push(
+    <line
+      key="h-0"
+      x1={0}
+      x2={width}
+      y1={scaleY(0)}
+      y2={scaleY(0)}
+      stroke="#aaa"
+      strokeDasharray="4,2"
+    />
+  );
+
+  // X axis labels
+  const xAxisLabels = [];
+  for (let t = Math.ceil(xMin / timeGridStep) * timeGridStep; t <= xMax; t += timeGridStep) {
+    const x = scaleX(t);
+    const labelTime = ((t - virtualTimeBase) / 1000).toFixed(0);
+    xAxisLabels.push(
+      <text
+        key={`label-${t}`}
+        x={x}
+        y={height - 4}
+        fill="#444"
+        fontSize="10"
+        textAnchor="middle"
+      >
+        {labelTime}s
+      </text>
+    );
+  }
+
   return (
-    <div style={{ border: "1px solid black", width, height }}>
+    <div style={{ width, height, border: "1px solid black", fontFamily: "sans-serif" }}>
       <svg width={width} height={height}>
-        <polyline fill="none" stroke="blue" strokeWidth="2" points={points} />
+        {/* Grid lines */}
+        <g>{gridLines}</g>
+
+        {/* X axis labels */}
+        <g>{xAxisLabels}</g>
+
+        {/* Data line */}
+        <polyline
+          fill="none"
+          stroke="#007bff"
+          strokeWidth="1.5"
+          points={points}
+        />
+
+        {/* Outline */}
+        <rect x="0" y="0" width={width} height={height} fill="none" stroke="#000" />
       </svg>
     </div>
   );

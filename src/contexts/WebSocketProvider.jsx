@@ -20,8 +20,9 @@ export function WebSocketProvider({ children }) {
 
   const bufferRef = useRef([]);
 
-  const virtualTimeBaseRef = useRef(null);
-  const lastSyncMonotonicRef = useRef(null);
+  const [virtualTimeBase, setVirtualTimeBase] = useState(null);
+  
+  const intervalRef = useRef(null);
 
   const connectWebSocket = () => {
     if (
@@ -42,54 +43,64 @@ export function WebSocketProvider({ children }) {
       ws.current.onmessage = (event) => {
         try {
           const packet = JSON.parse(event.data);
-
+      
           if (!packet.samples || !Array.isArray(packet.samples)) {
             console.warn("Received packet without samples", packet);
             return;
           }
-
+      
           if (packet.sample_rate > 0 && packet.samples.length > 0) {
             const batchDurationMs = (packet.samples.length / packet.sample_rate) * 1000;
             const batchStartMs = new Date(packet.timestamp_start).getTime();
             const batchEndMs = batchStartMs + batchDurationMs;
-
-            const oldVirtualTimeBase = virtualTimeBaseRef.current;
-            
-            if (oldVirtualTimeBase !== null && batchEndMs < oldVirtualTimeBase) {
-              console.log(`[INFO] GPS time moved backward: ${new Date(oldVirtualTimeBase).toISOString()} → ${new Date(batchEndMs).toISOString()}`);
+      
+            if (virtualTimeBase !== null && batchEndMs < virtualTimeBase) {
+              console.log(
+                `[INFO] GPS time moved backward: ${new Date(virtualTimeBase).toISOString()} → ${new Date(batchEndMs).toISOString()}`
+              );
             }
-
-            virtualTimeBaseRef.current = batchEndMs;
-            lastSyncMonotonicRef.current = performance.now();
-
-            console.log(`[GPS SYNC] virtualTimeBase=${new Date(batchEndMs).toISOString()}, monotonic=${lastSyncMonotonicRef.current.toFixed(2)}ms`);
+      
+            intervalRef.current ? clearInterval(intervalRef.current) : "";
+            intervalRef.current = null;
+      
+            setVirtualTimeBase(batchEndMs);
+      
+            let intervalCount = 1;  
+            const delay = 100;
+            
+            intervalRef.current = setInterval(() => {
+              setVirtualTimeBase(batchEndMs + delay * intervalCount);
+              intervalCount += 1;  
+            }, delay);
+      
+            console.log(`[GPS SYNC] virtualTimeBase=${new Date(batchEndMs).toISOString()}`);
           }
-
-          const incomingSamples = packet.samples.map(s => ({
+      
+          const incomingSamples = packet.samples.map((s) => ({
             timestamp: s.timestamp * 1000,
             value: s.value,
           }));
-
+      
           const buffer = bufferRef.current;
           const maxBufferTimestamp = buffer.length > 0 ? buffer[buffer.length - 1].timestamp : -Infinity;
-
-          const firstNewSampleIndex = incomingSamples.findIndex(s => s.timestamp > maxBufferTimestamp);
+      
+          const firstNewSampleIndex = incomingSamples.findIndex((s) => s.timestamp > maxBufferTimestamp);
           if (firstNewSampleIndex === -1) {
             console.log(`Incoming batch fully overlaps buffer, ignoring`);
             return;
           }
-
+      
           const trimmedSamples = incomingSamples.slice(firstNewSampleIndex);
           bufferRef.current = buffer.concat(trimmedSamples);
-
+      
           console.log(
             `Received ${incomingSamples.length} samples, trimmed to ${trimmedSamples.length}, buffer size now ${bufferRef.current.length}`
           );
         } catch (e) {
           console.error("Failed to parse WebSocket message:", e);
         }
-      };
-
+      }; 
+      
       ws.current.onclose = () => {
         console.log("WebSocket disconnected");
         setConnected(false);
@@ -132,27 +143,21 @@ export function WebSocketProvider({ children }) {
     }
   };
 
-  const getVirtualTimeNow = () => {
-    if (virtualTimeBaseRef.current === null || lastSyncMonotonicRef.current === null) {
-      return null;
-    }
-    const elapsed = performance.now() - lastSyncMonotonicRef.current;
-    return virtualTimeBaseRef.current + elapsed;
-  };
-
   useEffect(() => {
     const interval = setInterval(() => {
-      const nowVirtualTime = getVirtualTimeNow();
-      if (nowVirtualTime !== null) {
-        bufferRef.current = bufferRef.current.filter(
-          sample => sample.timestamp >= nowVirtualTime - bufferSizeMs
-        );
-      }
+      if (virtualTimeBase === null) return;
+
+      const nowVirtualTime = virtualTimeBase;
+
+      bufferRef.current = bufferRef.current.filter(
+        sample => sample.timestamp >= nowVirtualTime - bufferSizeMs
+      );
+
       setSamples([...bufferRef.current]);
-    }, 100); 
+    }, 100);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [virtualTimeBase]);  
 
   useEffect(() => {
     connectWebSocket();
@@ -163,6 +168,9 @@ export function WebSocketProvider({ children }) {
         disconnectWebSocket();
         bufferRef.current = [];
         setSamples([]);
+        setVirtualTimeBase(null); 
+        intervalRef.current ? clearInterval(intervalRef.current) : "";
+        intervalRef.current = null;
       } else if (document.visibilityState === "visible") {
         console.log("Tab visible, reconnecting WebSocket...");
         connectWebSocket();
@@ -178,7 +186,7 @@ export function WebSocketProvider({ children }) {
   }, []);
 
   return (
-    <WebSocketContext.Provider value={{ connected, samples, getVirtualTimeNow }}>
+    <WebSocketContext.Provider value={{ connected, samples, virtualTimeBase }}>
       {children}
     </WebSocketContext.Provider>
   );
