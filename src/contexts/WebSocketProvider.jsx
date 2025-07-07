@@ -18,13 +18,13 @@ export function WebSocketProvider({ children }) {
   const reconnectAttempts = useRef(0);
   const isManuallyClosed = useRef(false);
 
-  const max_reconnect_delay = 30000;
   const bufferSizeMs = 30000;
 
   const [connected, setConnected] = useState(false);
   const [samples, setSamples] = useState([]);
 
   const bufferRef = useRef([]);
+  const initialBufferLoaded = useRef(false);
 
   const [virtualTimeBase, setVirtualTimeBase] = useState(null);
 
@@ -100,7 +100,7 @@ export function WebSocketProvider({ children }) {
   
           const buffer = bufferRef.current;
   
-          if (buffer.length === 0) {
+          if (!initialBufferLoaded.current) {
             pendingSamplesRef.current = pendingSamplesRef.current.concat(incomingSamples);
             console.log(
               `Buffer empty, accumulating ${incomingSamples.length} samples in pendingSamplesRef (total pending: ${pendingSamplesRef.current.length})`
@@ -164,7 +164,7 @@ export function WebSocketProvider({ children }) {
           document.visibilityState === "visible" &&
           !isManuallyClosed.current
         ) {
-          scheduleReconnect();
+          window.location.reload();
         }
       };
   
@@ -176,24 +176,6 @@ export function WebSocketProvider({ children }) {
         reject(error);
       };
     });
-  };
-  
-
-  const scheduleReconnect = () => {
-    if (reconnectTimer.current) {
-      clearTimeout(reconnectTimer.current);
-    }
-
-    const delay = Math.min(
-      3000 * 2 ** reconnectAttempts.current,
-      max_reconnect_delay
-    );
-    console.log(`Reconnecting in ${delay / 1000} seconds...`);
-
-    reconnectTimer.current = setTimeout(() => {
-      reconnectAttempts.current += 1;
-      connectWebSocket();
-    }, delay);
   };
 
   const disconnectWebSocket = () => {
@@ -237,13 +219,16 @@ export function WebSocketProvider({ children }) {
         console.log("Tab hidden, disconnecting WebSocket...");
         disconnectWebSocket();
         bufferRef.current = [];
+        pendingSamplesRef.current = [];
         setSamples([]);
         setVirtualTimeBase(null);
+        initialBufferLoaded.current = false;
         intervalRef.current ? clearInterval(intervalRef.current) : "";
         intervalRef.current = null;
       } else if (document.visibilityState === "visible") {
         console.log("Tab visible, reconnecting WebSocket...");
-
+        bufferRef.current = [];
+        pendingSamplesRef.current = [];
         await connectWebSocket();
         fetchInitialBuffer();
       }
@@ -261,28 +246,17 @@ export function WebSocketProvider({ children }) {
     try {
       const response = await fetch("https://seismologos.shop/buffer");
       const data = await response.json();
-
+  
       if (Array.isArray(data.samples)) {
         const getSamples = data.samples.map((s) => ({
           timestamp: s.timestamp * 1000,
           value: s.value,
         }));
-
-        const existingBuffer = bufferRef.current;
-        const existingMaxTimestamp =
-          existingBuffer.length > 0
-            ? existingBuffer[existingBuffer.length - 1].timestamp
-            : -Infinity;
-
-        const filteredGetSamples = getSamples.filter(
-          (s) => s.timestamp > existingMaxTimestamp
-        );
-
-        bufferRef.current = existingBuffer.concat(filteredGetSamples);
-
-        setSamples([...bufferRef.current]);
-
-        const lastSample = bufferRef.current[bufferRef.current.length - 1];
+  
+        bufferRef.current = getSamples;
+        setSamples([...getSamples]);
+  
+        const lastSample = getSamples[getSamples.length - 1];
         if (lastSample) {
           setVirtualTimeBase(lastSample.timestamp);
           console.log(
@@ -290,11 +264,14 @@ export function WebSocketProvider({ children }) {
             new Date(lastSample.timestamp).toISOString()
           );
         }
+  
+        initialBufferLoaded.current = true;
       }
     } catch (err) {
       console.error("[INIT] Failed to fetch buffer:", err);
     }
   };
+  
 
   return (
     <WebSocketContext.Provider value={{ connected, samples, virtualTimeBase }}>
