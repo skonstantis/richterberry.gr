@@ -51,17 +51,15 @@ function SeismoPlot({ buffer, virtualNow }) {
         const xVal = virtualNow;
         const xPos = u.valToPos(xVal, 'x', true);
   
-        // Draw dashed vertical line
         ctx.beginPath();
         ctx.moveTo(xPos, top);
         ctx.lineTo(xPos, top + height);
-        ctx.strokeStyle = "#f00"; // red color
+        ctx.strokeStyle = "#f00"; 
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 4]);
         ctx.stroke();
         ctx.setLineDash([]);
   
-        // Draw label "Now" above the top of the plot
         ctx.fillStyle = "#f00";
         ctx.font = "12px sans-serif";
         ctx.textAlign = "center";
