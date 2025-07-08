@@ -1,37 +1,23 @@
 import React from "react";
-import { WebSocketProvider, useWebSocket } from "./contexts/WebSocketProvider";
-import { SimpleLinePlot } from "./components/SimpleLinePlot"
-import "./styles.css";
+import { WebSocketProvider, useWebSocket } from "./WebSocketProvider";
+import SeismoPlot from "./SeismoPlot";
 
-function Overlay() {
-  const { connected, overlayText } = useWebSocket();
-
-  if (connected) return null;
-
-  return (
-    <div className="overlay">
-      {overlayText || "Connecting to server..."}  
-    </div>
-  );
-}
-
-function AppContent() {
-  const { connected, samples, virtualTimeBase } = useWebSocket();
+function Status() {
+  const { connected, buffer, virtualNow } = useWebSocket();
 
   return (
     <div>
-      <h2>Seismograph Plot (Last 30 sec)</h2>
-      {!connected && <p>Disconnected...</p>}
-      <SimpleLinePlot samples={samples} virtualTimeBase={virtualTimeBase} />
+      <h2>WebSocket Status</h2>
+      <p>Status: {connected ? "Connected ✅" : "Disconnected ❌"}</p>
+      <SeismoPlot buffer={buffer} virtualNow={virtualNow} />
     </div>
   );
 }
 
 function App() {
   return (
-    <WebSocketProvider>
-      <AppContent />
-      <Overlay />
+    <WebSocketProvider url="wss://seismologos.shop/ws/user">
+        <Status />
     </WebSocketProvider>
   );
 }
