@@ -1,66 +1,20 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useReducer, useEffect, useRef, useCallback, useState } from 'react';
 
-export function useBuffer(bufferSizeSec, firstMessage) {
-  const [buffer, setBuffer] = useState([]);
-  const [virtualNow, setVirtualNow] = useState(-Infinity);
+const tickMs = 100;
 
-  const virtualNowRef = useRef(virtualNow);
-  const lastVirtualUpdateRef = useRef(null);
+function reducer(state, action) {
+  switch (action.type) {
+    case 'SET_VIRTUAL_NOW':
+      return { ...state, virtualNow: action.payload };
 
-  const tickMs = 100;
+    case 'ADD_BATCH': {
+      const { batch, bufferSizeSec, isHistory } = action.payload;
+      if (!Array.isArray(batch) || batch.length === 0) return state;
 
-  useEffect(() => {
-    virtualNowRef.current = virtualNow;
-  }, [virtualNow]);
-
-  useEffect(() => {
-    let timeoutId;
-  
-    const tick = () => {
-      if (virtualNowRef.current !== -Infinity && lastVirtualUpdateRef.current != null) {
-        const elapsed = (performance.now() - lastVirtualUpdateRef.current) / 1000;
-  
-        setVirtualNow(prev => {
-          const newVirtualNow = prev + elapsed;
-  
-          setBuffer(prevBuffer => {
-            const pruned = prevBuffer.filter(
-              item => (newVirtualNow - item.timestamp) <= bufferSizeSec
-            );
-            return pruned.length === prevBuffer.length ? prevBuffer : pruned;
-          });
-  
-          return newVirtualNow;
-        });
-  
-        lastVirtualUpdateRef.current = performance.now();
-      }
-      timeoutId = setTimeout(tick, tickMs);
-    };
-  
-    lastVirtualUpdateRef.current = performance.now();
-    timeoutId = setTimeout(tick, tickMs);
-  
-    return () => clearTimeout(timeoutId);
-  }, [bufferSizeSec]);  
-
-  const addBatch = useCallback((batch, isHistory = false) => {
-    if (!Array.isArray(batch) || batch.length === 0) return;
-
-    setBuffer(prevBuffer => {
       const batchLastTimestamp = batch[batch.length - 1].timestamp;
-  
-      lastVirtualUpdateRef.current = performance.now();
-  
-      if (isHistory) {
-        setVirtualNow(prev => Math.max(prev, batchLastTimestamp));
-      } else {
-        setVirtualNow(batchLastTimestamp);
-      }
 
       const batchTimestamps = new Set(batch.map(item => item.timestamp));
-
-      const bufferWithoutDuplicates = prevBuffer.filter(
+      const bufferWithoutDuplicates = state.buffer.filter(
         item => !batchTimestamps.has(item.timestamp)
       );
 
@@ -72,7 +26,91 @@ export function useBuffer(bufferSizeSec, firstMessage) {
         item => (batchLastTimestamp - item.timestamp) <= bufferSizeSec
       );
 
-      return pruned;
+      const newVirtualNow = isHistory
+        ? Math.max(state.virtualNow, batchLastTimestamp)
+        : batchLastTimestamp;
+
+      return {
+        buffer: pruned,
+        virtualNow: newVirtualNow,
+      };
+    }
+
+    case 'TICK': {
+      const { bufferSizeSec, elapsed } = action.payload;
+      const newVirtualNow = state.virtualNow + elapsed;
+
+      const prunedBuffer = state.buffer.filter(
+        item => (newVirtualNow - item.timestamp) <= bufferSizeSec
+      );
+
+      return {
+        virtualNow: newVirtualNow,
+        buffer: prunedBuffer,
+      };
+    }
+
+    case 'CLEAR':
+      return { buffer: [], virtualNow: -Infinity };
+
+    default:
+      return state;
+  }
+}
+
+export function useBuffer(bufferSizeSec, firstMessage) {
+  const [state, dispatch] = useReducer(reducer, {
+    buffer: [],
+    virtualNow: -Infinity,
+  });
+
+  const lastVirtualUpdateRef = useRef(null);
+  const [isDocumentVisible, setIsDocumentVisible] = useState(document.visibilityState === 'visible');
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const visible = document.visibilityState === 'visible';
+      setIsDocumentVisible(visible);
+      if (!visible) {
+        dispatch({ type: 'CLEAR' });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  useEffect(() => {
+    if (state.virtualNow === -Infinity || state.buffer.length === 0 || !isDocumentVisible) {
+      return;
+    }
+
+    let timeoutId;
+
+    const tick = () => {
+      const now = performance.now();
+      const elapsed = (now - lastVirtualUpdateRef.current) / 1000;
+
+      dispatch({ type: 'TICK', payload: { elapsed, bufferSizeSec } });
+      lastVirtualUpdateRef.current = now;
+
+      timeoutId = setTimeout(tick, tickMs);
+    };
+
+    lastVirtualUpdateRef.current = performance.now();
+    timeoutId = setTimeout(tick, tickMs);
+
+    return () => clearTimeout(timeoutId);
+  }, [state.virtualNow, state.buffer.length, isDocumentVisible, bufferSizeSec]);
+
+  const addBatch = useCallback((batch, isHistory = false) => {
+    dispatch({
+      type: 'ADD_BATCH',
+      payload: {
+        batch,
+        isHistory,
+        bufferSizeSec,
+      },
     });
   }, [bufferSizeSec]);
 
@@ -83,6 +121,7 @@ export function useBuffer(bufferSizeSec, firstMessage) {
         console.error('Failed to fetch data:', response.statusText);
         return;
       }
+
       const data = await response.json();
       if (Array.isArray(data.samples)) {
         addBatch(data.samples, true);
@@ -100,20 +139,9 @@ export function useBuffer(bufferSizeSec, firstMessage) {
     }
   }, [firstMessage, fetchHistory]);
 
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        setBuffer([]);
-        setVirtualNow(-Infinity);
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
-
   return {
     addBatch,
-    buffer,
-    virtualNow,
+    buffer: state.buffer,
+    virtualNow: state.virtualNow,
   };
 }
