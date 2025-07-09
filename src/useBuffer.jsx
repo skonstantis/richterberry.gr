@@ -116,7 +116,7 @@ export function useBuffer(bufferSizeSec, firstMessage) {
 
   const fetchHistory = useCallback(async () => {
     try {
-      const response = await fetch('https://seismologos.shop/buffer');
+      const response = await fetch('https://seismologos.shop/buffer30');
       if (!response.ok) {
         console.error('Failed to fetch data:', response.statusText);
         return;
