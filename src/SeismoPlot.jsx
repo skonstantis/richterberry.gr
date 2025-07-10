@@ -88,6 +88,7 @@ function SeismoPlot({ buffer, virtualNow }) {
         size: 70,
         grid: { show: true },
         label: "Time",
+        labelFont: "bold 12px sans-serif",
         labelGap: -30,
         ticks: {
           values: (min, max) => {

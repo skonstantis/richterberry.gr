@@ -1,6 +1,6 @@
 import { useReducer, useEffect, useRef, useCallback, useState } from 'react';
 
-const tickMs = 100;
+const tickMs = 250;
 
 function reducer(state, action) {
   switch (action.type) {
