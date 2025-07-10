@@ -71,7 +71,7 @@ function SeismoPlot({ buffer, virtualNow }) {
   
 
   const options = useMemo(() => ({
-    width: 800,
+    width: 890,
     height: 300,
     scales: {
       x: {
@@ -105,7 +105,7 @@ function SeismoPlot({ buffer, virtualNow }) {
       {
         stroke: "#888",
         size: 40,
-        grid: { show: true },
+        grid: { show: false },
         label: "Amplitude",
         labelGap: 5,
         ticks: {

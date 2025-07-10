@@ -89,7 +89,7 @@ function computeSpectrogram(buffer, windowSize, hopSize, sampleRate) {
           size: 11,
         },
       },
-      showscale: allTraces.length === 0, 
+      showscale: false
     });
   }
 

@@ -1,7 +1,6 @@
 import React from "react";
 import { WebSocketProvider, useWebSocket } from "./WebSocketProvider";
 import SeismoPlot from "./SeismoPlot";
-import EmptySeismoPlot from "./EmptySeismoPlot";
 import Spectrogram from "./Spectrogram";
 
 function Status() {
@@ -10,20 +9,28 @@ function Status() {
   const isBufferEmpty = !buffer || buffer.length === 0;
 
   return (
-    <div>
-      <h2>WebSocket Status</h2>
+    <div style={{ textAlign: "center", padding: "20px" }}>
       <p>Status: {connected ? "Connected ✅" : "Disconnected ❌"}</p>
-      {isBufferEmpty ? (
-        <EmptySeismoPlot />
-      ) : (
-        <>
-        <SeismoPlot buffer={buffer} virtualNow={virtualNow} />
-        <Spectrogram buffer={buffer} virtualNow={virtualNow} bufferSizeSec={30} />
-        </>
+      {!isBufferEmpty && (
+        <div
+          style={{
+            maxWidth: "1000px",
+            margin: "0 auto", 
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "20px",
+            width: "100%",
+          }}
+        >
+          <SeismoPlot buffer={buffer} virtualNow={virtualNow} />
+          <Spectrogram buffer={buffer} virtualNow={virtualNow} bufferSizeSec={30} />
+        </div>
       )}
     </div>
   );
 }
+
 
 function App() {
   return (
