@@ -5,7 +5,7 @@ import { WebSocketProvider } from "./WebSocketProvider.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <WebSocketProvider>
+    <WebSocketProvider url="wss://seismologos.shop/ws/user">
       <App />
     </WebSocketProvider>
   </StrictMode>

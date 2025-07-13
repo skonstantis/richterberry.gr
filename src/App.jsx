@@ -1,27 +1,22 @@
 import React from "react";
-import { WebSocketProvider, useWebSocket } from "./WebSocketProvider";
+import Header from "./Header";
+import Body from "./Body";
+import Info from "./Info";
+import Health from "./Health";
 import SeismoPlot from "./SeismoPlot";
 import Spectrogram from "./Spectrogram";
-import Body from "./Body";
-import Header from "./Header";
-
-function Status() {
-  const { connected } = useWebSocket();
-  return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
-      <p>Status: {connected ? "Connected ✅" : "Disconnected ❌"}</p>
-    </div>
-  );
-}
+import { useWebSocket } from "./WebSocketProvider";
 
 function App() {
   const { buffer, virtualNow } = useWebSocket();
   const isBufferEmpty = !buffer || buffer.length === 0;
   return (
-    <WebSocketProvider url="wss://seismologos.shop/ws/user">
-      <Header/>
+    <>
+    <Header />
       <Body>
-        <Status/>
+        {/* <Info />
+        <br />
+        <Health /> */}
         {!isBufferEmpty && (
           <div
             style={{
@@ -43,7 +38,7 @@ function App() {
           </div>
         )}
       </Body>
-    </WebSocketProvider>
+    </>  
   );
 }
 
