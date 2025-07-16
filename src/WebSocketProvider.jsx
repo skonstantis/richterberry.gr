@@ -19,9 +19,15 @@ export const useWebSocket = () => useContext(WebSocketContext);
 export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
   const ws = useRef(null);
 
+  const [isConnecting, setIsConnecting] = useState(true);
   const [connected, setConnected] = useState(false);
+  const [gpsSynced, setGpsSynced] = useState(false);
   const [firstMessage, setFirstMessage] = useState(false);
+  
   const { addBatch, buffer, virtualNow} = useBuffer(bufferSizeSec, firstMessage);
+
+  const [stationConnected, setStationConnected] = useState(false);
+  const stationTimeoutRef = useRef(null);
 
   const reconnectTimeout = useRef(null);
   const reconnectAttempts = useRef(0);
@@ -29,6 +35,27 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
 
   const isTabVisible = useRef(!document.hidden);
   const MAX_BACKOFF_DELAY = 30000;
+  const STATION_DISCON_TIMEOUT = 5000;
+  const STATION_ID = "GR000";
+
+  const refreshStationTimeout = () => {
+    if (stationTimeoutRef.current) {
+      clearTimeout(stationTimeoutRef.current);
+    }
+  
+    setStationConnected(true);
+  
+    stationTimeoutRef.current = setTimeout(() => {
+      setStationConnected(false);
+      setGpsSynced(false);
+    }, STATION_DISCON_TIMEOUT);
+  };
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(stationTimeoutRef.current);
+    };
+  }, []);
 
   const cleanupWebSocket = () => {
     if (ws.current) {
@@ -50,23 +77,29 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
 
     cleanupWebSocket();
 
+    setIsConnecting(true);
     const socket = new WebSocket(url);
     ws.current = socket;
 
     socket.onopen = () => {
       console.log("WebSocket connected");
       setConnected(true);
+      setIsConnecting(false);
       reconnectAttempts.current = 0;
     };
 
     socket.onmessage = (event) => {
       try {
-        if(!firstMessage)
-          setFirstMessage(true);
         const data = JSON.parse(event.data);
-
-        if (Array.isArray(data.samples) && data.samples.length > 0) {
-          addBatch(data.samples);
+        if(data.type == "data" && data.station_id == STATION_ID)
+        {
+          if(!firstMessage)
+            setFirstMessage(true);
+          refreshStationTimeout();
+          setGpsSynced(data.gps_synced);
+          if (Array.isArray(data.samples) && data.samples.length > 0) {
+            addBatch(data.samples);
+          }
         }
 
       } catch (err) {
@@ -77,6 +110,7 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
     socket.onclose = () => {
       console.warn("WebSocket closed");
       setConnected(false);
+      setIsConnecting(false);
       if (shouldReconnect.current && isTabVisible.current) {
         attemptReconnect();
       }
@@ -84,6 +118,7 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
 
     socket.onerror = () => {
       console.error("WebSocket error");
+      setIsConnecting(false);
       socket.close();
     };
   };
@@ -119,6 +154,8 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
         console.log("Tab hidden — closing WebSocket");
         shouldReconnect.current = false;
         clearTimeout(reconnectTimeout.current);
+        setStationConnected(false);
+        setConnected(false);
         cleanupWebSocket();
       }
     };
@@ -141,8 +178,11 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
     <WebSocketContext.Provider
       value={{
         connected,
+        gpsSynced,
         buffer,
         virtualNow,
+        stationConnected,
+        isConnecting,
       }}
     >
       {children}

@@ -14,9 +14,9 @@ function App() {
     <>
     <Header />
       <Body>
-        {/* <Info />
+        <Info />
         <br />
-        <Health /> */}
+        <Health /> 
         {!isBufferEmpty && (
           <div
             style={{
