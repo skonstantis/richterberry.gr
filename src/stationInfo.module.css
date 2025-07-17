@@ -1,73 +1,116 @@
-.wrapper
-{
-    background: linear-gradient(to right, #6A1B2A, #C51A4A);
-    color: white;
-    padding: 5px 20px;
-    border-radius: 16px;
-    margin: 20px 20px 5%; 
-    padding: 20px;
+.wrapper {
+  min-width: 310px;
+  background: linear-gradient(to right, #6a1b2a, #c51a4a);
+  color: white;
+  padding: 20px 50px 20px 20px;
+  border-radius: 16px;
+  margin: 20px 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statusWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: rgba(135, 135, 135, 0.7);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  border: 0.5px solid rgba(255, 255, 255, 0.5);
+  width: fit-content;
+  border-radius: 16px;
 }
 
 .row {
-    display: flex;
-    gap: 10px; 
-    align-items: baseline;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
 }
 
-.locationWrapper
+.locationIcon {
+  width: 12px;
+  margin-right: 5px;
+}
+
+.idIcon {
+  height: 15px;
+  margin-right: 5px;
+}
+
+.settingsIcon {
+  width: 16px;
+  margin-right: 5px;
+}
+
+.modeTesting {
+  background: #c49a00;
+}
+
+.modeDeployed {
+  background: #7bb661;
+}
+
+.modeRetired {
+  background: #b04a4a;
+}
+
+.modeWrapper {
+  width: fit-content;
+  padding: 3px 7px;
+  margin: 0 0 10px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.locationWrapper {
+  background: #c51a4a;
+  width: fit-content;
+  padding: 3px 7px;
+  margin: 0 0 10px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.stationWrapper {
+  color: white;
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.stationType {
+  color: #db6f87;
+  font-size: 20px;
+}
+
+.statusIcons
 {
-    background: #C51A4A;
-    width: fit-content;
-    padding: 3px 7px;
-    margin: 0 0 10px;
-    border-radius: 16px;
+    height: 30px;
+    padding: 5px;
+}
+
+@media (max-width: 830px) {
+  .wrapper {
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+
+  }
+
+  .statusWrapper {
+    margin-top: 20px;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 465px) {
+  .stationType {
     font-size: 14px;
-    font-weight: 500;
-    display: flex;         
-    align-items: center;    
-}
-
-.locationIcon
-{
-    width: 12px;          
-    margin-right: 5px;    
-}
-
-.idIcon
-{
-    height: 15px;          
-    margin-right: 5px;    
-}
-
-.settingsIcon
-{
-    width: 16px;
-    margin-right: 5px;    
-}
-
-.stateWrapper
-{
-    background: #C49A00;
-    width: fit-content;
-    padding: 3px 7px;
-    margin: 0 0 10px;
-    border-radius: 16px;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;         
-    align-items: center;    
-}
-
-.stationWrapper
-{
-    color: white;
-    font-size: 36px;
-    font-weight: 900;
-    letter-spacing: 2px;
-}
-
-.stationHeading
-{
-    color: 	#DB6F87;
-    font-size: 20px;
+  }
 }

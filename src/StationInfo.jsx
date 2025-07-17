@@ -2,8 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import { useWebSocket } from "./WebSocketProvider";
 import styles from "./stationInfo.module.css";
 
-function Health() {
-  const { connected, gpsSynced, stationConnected, isConnecting } =
+function StationInfo() {
+  const modeClasses = {
+    Testing: styles.modeTesting,
+    Deployed: styles.modeDeployed,
+    Retired: styles.modeRetired,
+  };
+
+  const info = {
+    name: "prometheus",
+    id: "GR000",
+    location: "Athens Central",
+    mode: "Testing",
+    type: "High-Resolution Real-Time Seismic Station",
+  };
+  const { connected, stationConnected, isConnecting, gpsSynced } =
     useWebSocket();
 
   const [timeoutOver, setTimeoutOver] = useState(false);
@@ -54,51 +67,55 @@ function Health() {
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.row}>
-        <div className={styles.locationWrapper}>
-          <img
-            src={"./location-icon.svg"}
-            alt="Location"
-            className={styles.locationIcon}
-          />
-          Athens Central
+      <div>
+        <div className={styles.row}>
+          <div className={styles.locationWrapper}>
+            <img
+              src={"./location-icon.svg"}
+              alt="Location"
+              className={styles.locationIcon}
+            />
+            {info.location}
+          </div>
+          <div
+            className={`${styles.modeWrapper} ${modeClasses[info.mode] || ""}`}
+          >
+            <img
+              src={"./mode-icon.svg"}
+              alt="Mode"
+              className={styles.settingsIcon}
+            />
+            {info.mode}
+          </div>
         </div>
-        <div className={styles.stateWrapper}>
+        <div className={styles.row}>
+          <div className={styles.stationWrapper}>{info.name.toUpperCase()}</div>
           <img
-            src={"./settings-icon.svg"}
-            alt="State"
-            className={styles.settingsIcon}
+            src={"./" + info.id + ".svg"}
+            alt="Id"
+            className={styles.idIcon}
           />
-          Test Mode
         </div>
+        <div className={styles.stationType}>{info.type}</div>
       </div>
-      <div className={styles.row}>
-      <div className={styles.stationWrapper}>PROMETHEUS</div>
-        <img src={"./GR000.svg"} alt="Id" className={styles.idIcon} />
+      <div className={styles.statusWrapper}>
+        <img src={"./client-connected.svg"} alt="Client" className={styles.statusIcons} />
+        {isConnecting ? <img src={"./server-connecting.svg"} alt="Server" className={styles.statusIcons} /> : connected ? <img src={"./server-connected.svg"} alt="Server" className={styles.statusIcons} /> : <img src={"./server-disconnected.svg"} alt="Server" className={styles.statusIcons} />}
+        {connected && (
+          <div>
+            {timeoutOver || stationConnected
+              ? stationConnected
+                ? <img src={"./station-connected.svg"} alt="Station" className={styles.statusIcons} />
+                : <img src={"./station-disconnected.svg"} alt="Station" className={styles.statusIcons} />
+              : <img src={"./station-connecting.svg"} alt="Station" className={styles.statusIcons} />}
+          </div>
+        )}
+        {connected && stationConnected && (
+          <div>{gpsSynced ? <img src={"./gps-connected.svg"} alt="GPS" className={styles.statusIcons} /> : <img src={"./gps-disconnected.svg"} alt="GPS" className={styles.statusIcons} />}</div>
+        )}
       </div>
-      <div className={styles.stationHeading}>
-        High-Resolution Real-Time Seismic Station
-      </div>
-      <p>
-        Client connection:{" "}
-        {isConnecting ? "connecting..." : connected ? "good" : "disconnected"}
-      </p>
-      {connected && (
-        <p>
-          Station connection:{" "}
-          {timeoutOver || stationConnected
-            ? stationConnected
-              ? "good"
-              : "disconnected"
-            : "connecting..."}
-        </p>
-      )}
-
-      {connected && stationConnected && (
-        <p>GPS synced timestamps: {gpsSynced ? "yes" : "no"}</p>
-      )}
     </div>
   );
 }
 
-export default Health;
+export default StationInfo;
