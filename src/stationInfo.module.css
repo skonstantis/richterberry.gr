@@ -1,0 +1,73 @@
+.wrapper
+{
+    background: linear-gradient(to right, #6A1B2A, #C51A4A);
+    color: white;
+    padding: 5px 20px;
+    border-radius: 16px;
+    margin: 20px 20px 5%; 
+    padding: 20px;
+}
+
+.row {
+    display: flex;
+    gap: 10px; 
+    align-items: baseline;
+}
+
+.locationWrapper
+{
+    background: #C51A4A;
+    width: fit-content;
+    padding: 3px 7px;
+    margin: 0 0 10px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;         
+    align-items: center;    
+}
+
+.locationIcon
+{
+    width: 12px;          
+    margin-right: 5px;    
+}
+
+.idIcon
+{
+    height: 15px;          
+    margin-right: 5px;    
+}
+
+.settingsIcon
+{
+    width: 16px;
+    margin-right: 5px;    
+}
+
+.stateWrapper
+{
+    background: #C49A00;
+    width: fit-content;
+    padding: 3px 7px;
+    margin: 0 0 10px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;         
+    align-items: center;    
+}
+
+.stationWrapper
+{
+    color: white;
+    font-size: 36px;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+.stationHeading
+{
+    color: 	#DB6F87;
+    font-size: 20px;
+}

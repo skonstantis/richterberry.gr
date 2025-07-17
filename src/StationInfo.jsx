@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useWebSocket } from "./WebSocketProvider";
+import styles from "./stationInfo.module.css";
 
 function Health() {
-  const { connected, gpsSynced, stationConnected, isConnecting } = useWebSocket();
+  const { connected, gpsSynced, stationConnected, isConnecting } =
+    useWebSocket();
 
   const [timeoutOver, setTimeoutOver] = useState(false);
   const timeoutIdRef = useRef(null);
@@ -51,8 +53,32 @@ function Health() {
   }, [connected]);
 
   return (
-    <div>
-      <p>Pipeline Health Status:</p>
+    <div className={styles.wrapper}>
+      <div className={styles.row}>
+        <div className={styles.locationWrapper}>
+          <img
+            src={"./location-icon.svg"}
+            alt="Location"
+            className={styles.locationIcon}
+          />
+          Athens Central
+        </div>
+        <div className={styles.stateWrapper}>
+          <img
+            src={"./settings-icon.svg"}
+            alt="State"
+            className={styles.settingsIcon}
+          />
+          Test Mode
+        </div>
+      </div>
+      <div className={styles.row}>
+      <div className={styles.stationWrapper}>PROMETHEUS</div>
+        <img src={"./GR000.svg"} alt="Id" className={styles.idIcon} />
+      </div>
+      <div className={styles.stationHeading}>
+        High-Resolution Real-Time Seismic Station
+      </div>
       <p>
         Client connection:{" "}
         {isConnecting ? "connecting..." : connected ? "good" : "disconnected"}

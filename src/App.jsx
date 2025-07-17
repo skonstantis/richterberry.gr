@@ -1,8 +1,7 @@
 import React from "react";
 import Header from "./Header";
 import Body from "./Body";
-import Info from "./Info";
-import Health from "./Health";
+import StationInfo from "./StationInfo";
 import SeismoPlot from "./SeismoPlot";
 import Spectrogram from "./Spectrogram";
 import { useWebSocket } from "./WebSocketProvider";
@@ -14,9 +13,7 @@ function App() {
     <>
     <Header />
       <Body>
-        <Info />
-        <br />
-        <Health /> 
+        <StationInfo /> 
         {!isBufferEmpty && (
           <div
             style={{
