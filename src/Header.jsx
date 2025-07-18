@@ -3,11 +3,7 @@ import styles from "./header.module.css";
 import { useWebSocket } from "./WebSocketProvider";
 
 function Header() {
-  const { stationConnected } = useWebSocket();
-
-  const stations = {
-    Prometheus: "Athens Central",
-  };
+  const { stations } = useWebSocket();
 
   return (
     <div>
@@ -23,9 +19,9 @@ function Header() {
             <span className={styles.downArrow}></span>
           </div>
           <div className={styles.dropdownContent}>
-            {Object.entries(stations).map(([name, location]) => (
+          {stations != null && stations.map(({ name, id, location, connected }) => (
               <Link
-                key={name}
+                key={id}
                 to={`/${name.toLowerCase()}`}
                 className={styles.dropdownItem}
               >
@@ -37,7 +33,7 @@ function Header() {
                   <span
                     className={styles.statusDot}
                     style={{
-                      backgroundColor: stationConnected ? "#7bb661" : "#b04a4a",
+                      backgroundColor: connected ? "#7bb661" : "#b04a4a",
                     }}
                   ></span>
                 </div>

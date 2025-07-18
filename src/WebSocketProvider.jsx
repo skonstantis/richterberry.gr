@@ -6,12 +6,12 @@ import React, {
   useState,
 } from "react";
 
-import { useBuffer } from "./useBuffer"; 
+import { useBuffer } from "./useBuffer";
 
 const WebSocketContext = createContext({
   connected: false,
-  buffer: [], 
-  virtualNow: null, 
+  buffer: [],
+  virtualNow: null,
 });
 
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -23,10 +23,12 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
   const [connected, setConnected] = useState(false);
   const [gpsSynced, setGpsSynced] = useState(false);
   const [firstMessage, setFirstMessage] = useState(false);
-  
-  const { addBatch, buffer, virtualNow} = useBuffer(bufferSizeSec, firstMessage);
+  const [stations, setStations] = useState(null);
+  const [error, setError] = useState(false);
+  const stationsRef = useRef(null);
 
-  const [stationConnected, setStationConnected] = useState(false);
+  const { addBatch, buffer, virtualNow } = useBuffer(bufferSizeSec, firstMessage);
+
   const stationTimeoutRef = useRef(null);
 
   const reconnectTimeout = useRef(null);
@@ -36,20 +38,86 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
   const isTabVisible = useRef(!document.hidden);
   const MAX_BACKOFF_DELAY = 30000;
   const STATION_DISCON_TIMEOUT = 5000;
-  const STATION_ID = "GR000";
+  const FETCH_STATIONS_TIMEOUT = 1000;
+
+  const fetchStations = async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_STATIONS_TIMEOUT); 
+  
+    try {
+      const response = await fetch("https://seismologos.shop/stations", {
+        signal: controller.signal,
+      });
+  
+      clearTimeout(timeoutId);
+  
+      if (!response.ok) {
+        console.error("Failed to fetch data:", response.statusText);
+        setError(true);
+        return;
+      }
+  
+      const data = await response.json();
+      setStations(data.stations);
+      stationsRef.current = data;
+    } catch (err) {
+      if (err.name === "AbortError") {
+        console.error("Fetch aborted due to timeout");
+        setError(true);
+      } else {
+        console.error("Error fetching stations data:", err);
+        setError(true);
+      }
+    }
+  };
 
   const refreshStationTimeout = () => {
     if (stationTimeoutRef.current) {
       clearTimeout(stationTimeoutRef.current);
     }
-  
-    setStationConnected(true);
-  
+
     stationTimeoutRef.current = setTimeout(() => {
-      setStationConnected(false);
       setGpsSynced(false);
     }, STATION_DISCON_TIMEOUT);
   };
+
+  useEffect(() => {
+    let intervalId = null;
+
+    const startFetching = () => {
+      fetchStations(); 
+      intervalId = setInterval(fetchStations, 1000);
+    };
+
+    const stopFetching = () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+      setStations(null);
+      stationsRef.current = null;
+    };
+
+    if (isTabVisible.current) {
+      startFetching();
+    }
+
+    const handleVisibilityChange = () => {
+      isTabVisible.current = !document.hidden;
+      if (isTabVisible.current) {
+        startFetching();
+      } else {
+        stopFetching();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      stopFetching();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -90,18 +158,16 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
 
     socket.onmessage = (event) => {
       try {
+        if (stationsRef.current == null) return;
         const data = JSON.parse(event.data);
-        if(data.type == "data" && data.station_id == STATION_ID)
-        {
-          if(!firstMessage)
-            setFirstMessage(true);
+        if (data.type === "data") {
+          if (!firstMessage) setFirstMessage(true);
           refreshStationTimeout();
           setGpsSynced(data.gps_synced);
           if (Array.isArray(data.samples) && data.samples.length > 0) {
             addBatch(data.samples);
           }
         }
-
       } catch (err) {
         console.error("Failed to parse WebSocket message", err);
       }
@@ -130,9 +196,7 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
         ? Math.min(1000 * 2 ** attempt, MAX_BACKOFF_DELAY)
         : MAX_BACKOFF_DELAY;
 
-    console.log(
-      `WebSocket: Reconnecting in ${delay / 1000}s (attempt #${attempt + 1})`
-    );
+    console.log(`WebSocket: Reconnecting in ${delay / 1000}s (attempt #${attempt + 1})`);
 
     reconnectTimeout.current = setTimeout(() => {
       reconnectAttempts.current += 1;
@@ -154,7 +218,6 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
         console.log("Tab hidden — closing WebSocket");
         shouldReconnect.current = false;
         clearTimeout(reconnectTimeout.current);
-        setStationConnected(false);
         setConnected(false);
         cleanupWebSocket();
       }
@@ -181,12 +244,12 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
         gpsSynced,
         buffer,
         virtualNow,
-        stationConnected,
         isConnecting,
+        error,
+        stations
       }}
     >
       {children}
     </WebSocketContext.Provider>
   );
 }
-
