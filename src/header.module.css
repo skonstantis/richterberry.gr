@@ -29,12 +29,18 @@
     color: white;
     text-decoration: none;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 16px;
     border-bottom: 2px solid transparent;
     padding-bottom: 2px;
     transition: border-color 0.3s, color 0.3s;
     display: flex; 
     align-items: center;
+    margin-left: 30px;
+    cursor: pointer;
+  }
+
+  .link:last-child{
+    font-size: 12px;
   }
   
   .link:hover {
@@ -52,8 +58,87 @@
     margin-left: 5px;
     margin-bottom: 2px;
   }
+
+  .downArrow
+  {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background-image: url('./down-arrow.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-left: 5px;
+    margin-top: 3px;
+
+  }
   
   .link:hover .questionmark {
     background-image: url('./questionmark-hover.svg');
   }
   
+    
+  .link:hover .downArrow {
+    background-image: url('./down-arrow-hover.svg');
+  }
+  
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .dropdownContent {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #1E1E1E;
+    min-width: 180px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 1;
+  }
+  
+  .dropdown:hover .dropdownContent {
+    display: block;
+  }
+  
+  .dropdownItem {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 8px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  .dropdownItem:last-child {
+    border-bottom: none;
+  }
+  
+  .dropdownItem:hover {
+    background-color: rgba(46,126,255,0.2);
+  }
+  
+  .stationInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .stationName {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  
+  .stationLocation {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 2px;
+  }
+  
+
+  .statusDot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-left: 12px;
+  }

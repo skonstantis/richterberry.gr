@@ -16,6 +16,7 @@ function StationInfo() {
     mode: "Testing",
     type: "High-Resolution Real-Time Seismic Station",
   };
+  
   const { connected, stationConnected, isConnecting, gpsSynced } =
     useWebSocket();
 
