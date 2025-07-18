@@ -34,15 +34,23 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
   const reconnectTimeout = useRef(null);
   const reconnectAttempts = useRef(0);
   const shouldReconnect = useRef(true);
+  const isFetchingStations = useRef(false);
 
   const isTabVisible = useRef(!document.hidden);
   const MAX_BACKOFF_DELAY = 30000;
   const STATION_DISCON_TIMEOUT = 5000;
-  const FETCH_STATIONS_TIMEOUT = 1000;
+  const FETCH_STATIONS_TIMEOUT = 10000;
 
   const fetchStations = async () => {
+    if (isFetchingStations.current) {
+      console.log("Previous fetch still running, skipping this one.");
+      return;
+    }
+  
+    isFetchingStations.current = true;
+  
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), FETCH_STATIONS_TIMEOUT); 
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_STATIONS_TIMEOUT);
   
     try {
       const response = await fetch("https://seismologos.shop/stations", {
@@ -68,8 +76,11 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
         console.error("Error fetching stations data:", err);
         setError(true);
       }
+    } finally {
+      isFetchingStations.current = false;
     }
   };
+  
 
   const refreshStationTimeout = () => {
     if (stationTimeoutRef.current) {

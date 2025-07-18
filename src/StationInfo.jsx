@@ -85,7 +85,7 @@ function StationInfo() {
         )}
         {connected && (
           <div>
-            {stations == null || info.connected ? (
+            {stations != null || info.connected ? (
               info.connected ? (
                 <img
                   src={"./station-connected.svg"}
