@@ -17,7 +17,7 @@ function StationInfo() {
   const info =
     stations == null
       ? null
-      : stations.find((station) => station.name === "prometheus");
+      : stations.find((station) => station.name === window.location.pathname.replace("/", ""));
 
   return (
     <div className={styles.wrapper}>
@@ -85,7 +85,7 @@ function StationInfo() {
         )}
         {connected && (
           <div>
-            {stations != null || info.connected ? (
+            {stations != null && info && info.connected ? (
               info.connected ? (
                 <img
                   src={"./station-connected.svg"}
@@ -108,7 +108,7 @@ function StationInfo() {
             )}
           </div>
         )}
-        {connected && info.connected && (
+        {connected && info && info.connected && (
           <div>
             {gpsSynced ? (
               <img

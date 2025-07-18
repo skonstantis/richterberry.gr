@@ -165,6 +165,7 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
       setConnected(true);
       setIsConnecting(false);
       reconnectAttempts.current = 0;
+      socket.send(JSON.stringify({ station_id: window.location.pathname.replace("/", "") == "gaia" ? "GR001" : "GR000" }));
     };
 
     socket.onmessage = (event) => {

@@ -1,14 +1,14 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Body from "./Body";
 import StationInfo from "./StationInfo";
 import SeismoPlot from "./SeismoPlot";
 import Spectrogram from "./Spectrogram";
 import HowItWorks from "./HowItWorks";
-import { useWebSocket } from "./WebSocketProvider";
+import { WebSocketProvider, useWebSocket } from "./WebSocketProvider";
 
-function PrometheusPage() {
+function StationPage() {
   const { buffer, virtualNow } = useWebSocket();
   const isBufferEmpty = !buffer || buffer.length === 0;
 
@@ -28,28 +28,47 @@ function PrometheusPage() {
           }}
         >
           <SeismoPlot buffer={buffer} virtualNow={virtualNow} />
-          <Spectrogram
-            buffer={buffer}
-            virtualNow={virtualNow}
-            bufferSizeSec={30}
-          />
+          <Spectrogram buffer={buffer} virtualNow={virtualNow} bufferSizeSec={30} />
         </div>
       )}
     </Body>
   );
 }
 
-function App() {
+function PrometheusPage() {
+  return <StationPage />;
+}
+
+function GaiaPage() {
+  return <StationPage />;
+}
+
+function AppRoutes() {
   return (
-    <Router>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Navigate to="/prometheus" replace />} />
-        <Route path="/prometheus" element={<PrometheusPage />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={<Navigate to="/prometheus" replace />} />
+      <Route path="/prometheus" element={<PrometheusPage />} />
+      <Route path="/gaia" element={<GaiaPage />} />
+      <Route path="/how-it-works" element={<HowItWorks />} />
+    </Routes>
   );
 }
 
-export default App;
+function AppContent() {
+  const location = useLocation();
+
+  return (
+    <WebSocketProvider key={location.pathname} url="wss://seismologos.shop/ws/user">
+      <Header />
+      <AppRoutes />
+    </WebSocketProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
+  );
+}

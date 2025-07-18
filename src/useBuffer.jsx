@@ -63,6 +63,7 @@ export function useBuffer(bufferSizeSec, firstMessage) {
     buffer: [],
     virtualNow: -Infinity,
   });
+  
 
   const lastVirtualUpdateRef = useRef(null);
   const [isDocumentVisible, setIsDocumentVisible] = useState(document.visibilityState === 'visible');
@@ -116,7 +117,8 @@ export function useBuffer(bufferSizeSec, firstMessage) {
 
   const fetchHistory = useCallback(async () => {
     try {
-      const response = await fetch('https://seismologos.shop/buffer30');
+      console.log(window.location.pathname.replace("/", ""));
+      const response = await fetch('https://seismologos.shop/' + window.location.pathname.replace("/", "") +'30');
       if (!response.ok) {
         console.error('Failed to fetch data:', response.statusText);
         return;
