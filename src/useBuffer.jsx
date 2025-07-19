@@ -86,6 +86,8 @@ export function useBuffer(bufferSizeSec, firstMessage) {
       return;
     }
 
+    lastVirtualUpdateRef.current = lastVirtualUpdateRef.current || performance.now();
+
     let timeoutId;
 
     const tick = () => {
@@ -101,7 +103,10 @@ export function useBuffer(bufferSizeSec, firstMessage) {
     lastVirtualUpdateRef.current = performance.now();
     timeoutId = setTimeout(tick, tickMs);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+      lastVirtualUpdateRef.current = null;
+    };
   }, [state.virtualNow, state.buffer.length, isDocumentVisible, bufferSizeSec]);
 
   const addBatch = useCallback((batch, isHistory = false) => {
@@ -118,7 +123,7 @@ export function useBuffer(bufferSizeSec, firstMessage) {
   const fetchHistory = useCallback(async () => {
     try {
       console.log(window.location.pathname.replace("/", ""));
-      const response = await fetch('https://seismologos.shop/' + window.location.pathname.replace("/", "") +'30');
+      const response = await fetch('https://seismologos.shop/' + window.location.pathname.replace("/", "") + bufferSizeSec);
       if (!response.ok) {
         console.error('Failed to fetch data:', response.statusText);
         return;

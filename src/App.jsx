@@ -35,20 +35,12 @@ function StationPage() {
   );
 }
 
-function PrometheusPage() {
-  return <StationPage />;
-}
-
-function GaiaPage() {
-  return <StationPage />;
-}
-
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/prometheus" replace />} />
-      <Route path="/prometheus" element={<PrometheusPage />} />
-      <Route path="/gaia" element={<GaiaPage />} />
+      <Route path="/prometheus" element={<StationPage />} />
+      <Route path="/gaia" element={<StationPage />} />
       <Route path="/how-it-works" element={<HowItWorks />} />
     </Routes>
   );

@@ -9,11 +9,9 @@ function StationInfo() {
     Retired: styles.modeRetired,
   };
 
-  const { connected, isConnecting, gpsSynced, stations, error } =
+  const { connected, isConnecting, gpsSynced, stations } =
     useWebSocket();
 
-  if (error) return <div>Server down</div>;
-  
   const info =
     stations == null
       ? null
