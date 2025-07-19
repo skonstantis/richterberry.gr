@@ -1,8 +1,25 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useRef, useLayoutEffect } from "react";
 import UplotReact from "uplot-react";
 import "uplot/dist/uPlot.min.css";
 
 function SeismoPlot({ buffer, virtualNow }) {
+  const containerRef = useRef(null);
+  const [width, setWidth] = useState(300); 
+
+  useLayoutEffect(() => {
+    function updateWidth() {
+      if (containerRef.current) {
+        const w = containerRef.current.clientWidth;
+        setWidth(w);
+      }
+    }
+
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
   const startTime = virtualNow - 30;
   const maxGap = 0.1;
 
@@ -50,16 +67,16 @@ function SeismoPlot({ buffer, virtualNow }) {
         const { left, top, height } = u.bbox;
         const xVal = virtualNow;
         const xPos = u.valToPos(xVal, 'x', true);
-  
+
         ctx.beginPath();
         ctx.moveTo(xPos, top);
         ctx.lineTo(xPos, top + height);
-        ctx.strokeStyle = "#f00"; 
+        ctx.strokeStyle = "#f00";
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 4]);
         ctx.stroke();
         ctx.setLineDash([]);
-  
+
         ctx.fillStyle = "#f00";
         ctx.font = "12px sans-serif";
         ctx.textAlign = "center";
@@ -68,10 +85,9 @@ function SeismoPlot({ buffer, virtualNow }) {
       },
     },
   }), [virtualNow]);
-  
 
   const options = useMemo(() => ({
-    width: 890,
+    width: width,
     height: 300,
     scales: {
       x: {
@@ -85,11 +101,10 @@ function SeismoPlot({ buffer, virtualNow }) {
     axes: [
       {
         stroke: "#888",
-        size: 70,
-        grid: { show: true },
+        size: 40,
         label: "Time",
         labelFont: "bold 12px sans-serif",
-        labelGap: -30,
+        labelGap: 8,
         ticks: {
           values: (min, max) => {
             const vals = [];
@@ -125,7 +140,7 @@ function SeismoPlot({ buffer, virtualNow }) {
     series: [
       {},
       {
-        stroke: "#03f",
+        stroke: "yellow",
         width: 1,
         spanGaps: false,
       },
@@ -134,9 +149,13 @@ function SeismoPlot({ buffer, virtualNow }) {
       show: false,
     },
     plugins: [nowLinePlugin],
-  }), [startTime, virtualNow, maxAbs, nowLinePlugin]);
+  }), [startTime, virtualNow, maxAbs, nowLinePlugin, width]);
 
-  return <UplotReact options={options} data={data} />;
+  return (
+    <div ref={containerRef} style={{ width: "100%" }}>
+      <UplotReact options={options} data={data} />
+    </div>
+  );
 }
 
 export default SeismoPlot;

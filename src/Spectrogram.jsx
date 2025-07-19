@@ -1,9 +1,10 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useRef, useLayoutEffect } from "react";
 import Plot from "react-plotly.js";
 import FFT from "fft.js";
 
 function computeSpectrogram(buffer, windowSize, hopSize, sampleRate) {
-  const hann = (N) => Array.from({ length: N }, (_, n) => 0.5 * (1 - Math.cos((2 * Math.PI * n) / (N - 1))));
+  const hann = (N) =>
+    Array.from({ length: N }, (_, n) => 0.5 * (1 - Math.cos((2 * Math.PI * n) / (N - 1))));
 
   const fft = (signal) => {
     const f = new FFT(signal.length);
@@ -89,7 +90,7 @@ function computeSpectrogram(buffer, windowSize, hopSize, sampleRate) {
           size: 11,
         },
       },
-      showscale: false
+      showscale: false,
     });
   }
 
@@ -97,6 +98,22 @@ function computeSpectrogram(buffer, windowSize, hopSize, sampleRate) {
 }
 
 export function Spectrogram({ buffer, virtualNow }) {
+  const containerRef = useRef(null);
+  const [width, setWidth] = useState(850);
+
+  useLayoutEffect(() => {
+    function updateWidth() {
+      if (containerRef.current) {
+        setWidth(containerRef.current.clientWidth);
+      }
+    }
+
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
   const traces = useMemo(() => {
     if (!buffer || buffer.length === 0) return [];
     const sampleRate = 250;
@@ -105,69 +122,81 @@ export function Spectrogram({ buffer, virtualNow }) {
     return computeSpectrogram(buffer, windowSize, hopSize, sampleRate);
   }, [buffer]);
 
-  const tickvals = Array.from({ length: 7 }, (_, i) => {
+  const tickvals = useMemo(() => {
+    const vals = [];
     const start = Math.floor((virtualNow - 30) / 5) * 5;
-    return start + i * 5;
-  });
+    for (let i = 0; i < 7; i++) {
+      vals.push(start + i * 5);
+    }
+    return vals;
+  }, [virtualNow]);
 
-  const ticktext = tickvals.map((ts) =>
-    new Date(ts * 1000).toLocaleTimeString(undefined, {
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    })
-  );
+  const ticktext = useMemo(() => {
+    return tickvals.map((ts) =>
+      new Date(ts * 1000).toLocaleTimeString(undefined, {
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
+    );
+  }, [tickvals]);
 
   return (
-    <Plot
-      data={traces}
-      layout={{
-        title: "Spectrogram",
-        width: 850,
-        height: 200,
-        xaxis: {
-          title: {
-            text: "Time",
-            font: {
-              size: 12,
-              color: "#888",
-              family: "sans-serif",
-              weight: "bold",
+    <div ref={containerRef} style={{ width: "100%", marginBottom: "-5px", marginLeft: "10px" }}>
+      <Plot
+        data={traces}
+        layout={{
+           plot_bgcolor: 'transparent', 
+           paper_bgcolor: 'transparent',
+          title: "Spectrogram",
+          width,
+          height: 300,
+          xaxis: {
+            title: {
+              text: "Time",
+              font: {
+                size: 12,
+                color: "#888",
+                family: "sans-serif",
+                weight: "bold",
+              },
             },
-          },
-          tickfont: {
-            color: "#888",
-            size: 11,
-          },
-          range: [virtualNow - 30, virtualNow],
-          tickmode: "array",
-          tickvals,
-          ticktext,
-        },
-        yaxis: {
-          title: {
-            text: "Frequency (Hz)",
-            font: {
-              size: 12,
+            tickfont: {
               color: "#888",
-              family: "sans-serif",
-              weight: "bold",
+              size: 11,
             },
+            showgrid: false,    
+            zeroline: false,
+            range: [virtualNow - 30, virtualNow],
+            tickmode: "array",
+            tickvals,
+            ticktext,
           },
-          showticklabels: false,
-          ticks: "",
-          showgrid: false,
-          zeroline: false,
-        },
-        margin: { t: 0, l: 20, r: 0, b: 50 },
-        showlegend: false,
-      }}
-      config={{
-        displayModeBar: false,
-        staticPlot: true,
-      }}
-    />
+          yaxis: {
+            title: {
+              text: "Frequency (Hz)",
+              font: {
+                size: 12,
+                color: "#888",
+                family: "sans-serif",
+                weight: "bold",
+              },
+            },
+            showticklabels: false,
+            ticks: "",
+            showgrid: false,
+            zeroline: false,
+          },
+          margin: { t: 0, l: 20, r: 20, b: 40 },
+          showlegend: false,
+        }}
+        config={{
+          displayModeBar: false,
+          staticPlot: true,
+        }}
+      />
+    </div>
   );
 }
 

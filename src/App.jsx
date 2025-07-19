@@ -1,46 +1,16 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Header from "./Header";
-import Body from "./Body";
-import StationInfo from "./StationInfo";
-import SeismoPlot from "./SeismoPlot";
-import Spectrogram from "./Spectrogram";
+import Station from "./Station";
 import HowItWorks from "./HowItWorks";
-import { WebSocketProvider, useWebSocket } from "./WebSocketProvider";
-
-function StationPage() {
-  const { buffer, virtualNow } = useWebSocket();
-  const isBufferEmpty = !buffer || buffer.length === 0;
-
-  return (
-    <Body>
-      <StationInfo />
-      {!isBufferEmpty && (
-        <div
-          style={{
-            maxWidth: "1000px",
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "20px",
-            width: "100%",
-          }}
-        >
-          <SeismoPlot buffer={buffer} virtualNow={virtualNow} />
-          <Spectrogram buffer={buffer} virtualNow={virtualNow} bufferSizeSec={30} />
-        </div>
-      )}
-    </Body>
-  );
-}
+import { WebSocketProvider } from "./WebSocketProvider";
 
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/prometheus" replace />} />
       <Route path="/how-it-works" element={<HowItWorks />} />
-      <Route path="*" element={<StationPage />} />
+      <Route path="*" element={<Station />} />
     </Routes>
   );
 }
