@@ -39,9 +39,8 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/prometheus" replace />} />
-      <Route path="/prometheus" element={<StationPage />} />
-      <Route path="/gaia" element={<StationPage />} />
       <Route path="/how-it-works" element={<HowItWorks />} />
+      <Route path="*" element={<StationPage />} />
     </Routes>
   );
 }

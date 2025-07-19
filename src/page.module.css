@@ -1,0 +1,52 @@
+.wrapper {
+    min-width: 310px;
+    background: linear-gradient(to right, #6a1b2a, #c51a4a);
+    color: white;
+    padding: 20px 50px 20px 20px;
+    border-radius: 16px;
+    margin: 20px 5%;
+    display: flex;
+    justify-content: flex-start; 
+    align-items: flex-start;   
+  }
+  
+  .notFound {
+    text-align: left; 
+    max-width: 70%px;
+  }
+  
+  .notFound h1 {
+    font-size: 2rem;
+    color: #fff;
+    margin: 0 0 10px;
+  }
+  
+  .notFound p {
+    font-size: 1rem;
+    color: #ddd;
+    margin: 10px 0;
+  }
+  
+  .notFound code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  
+  .link {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #fff;
+    color: #6a1b2a;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: background 0.3s, color 0.3s;
+  }
+  
+  .link:hover {
+    background: #ddd;
+    color: #6a1b2a;
+  }
+  

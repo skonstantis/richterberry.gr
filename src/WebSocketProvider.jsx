@@ -14,8 +14,6 @@ const WebSocketContext = createContext({
   virtualNow: null,
 });
 
-//checkpoint
-
 export const useWebSocket = () => useContext(WebSocketContext);
 
 export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
