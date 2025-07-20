@@ -17,7 +17,7 @@ function AppRoutes({bufferSizeSec}) {
 
 function AppContent() {
   const location = useLocation();
-  const bufferSizeSec = 300;
+  const bufferSizeSec = 30;
 
   return (
     <WebSocketProvider key={location.pathname} url="wss://seismologos.shop/ws/user" bufferSizeSec={bufferSizeSec}>
