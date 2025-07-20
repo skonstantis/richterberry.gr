@@ -111,6 +111,7 @@
   width: 100%; 
   padding-top: 20px;
   padding-bottom: 10px;
+  overflow: hidden;
 }
 
 @media (max-width: 660px) {

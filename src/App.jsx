@@ -5,23 +5,24 @@ import Station from "./Station";
 import HowItWorks from "./HowItWorks";
 import { WebSocketProvider } from "./WebSocketProvider";
 
-function AppRoutes() {
+function AppRoutes({bufferSizeSec}) {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/prometheus" replace />} />
       <Route path="/how-it-works" element={<HowItWorks />} />
-      <Route path="*" element={<Station />} />
+      <Route path="*" element={<Station bufferSizeSec={bufferSizeSec}/>} />
     </Routes>
   );
 }
 
 function AppContent() {
   const location = useLocation();
+  const bufferSizeSec = 300;
 
   return (
-    <WebSocketProvider key={location.pathname} url="wss://seismologos.shop/ws/user">
+    <WebSocketProvider key={location.pathname} url="wss://seismologos.shop/ws/user" bufferSizeSec={bufferSizeSec}>
       <Header />
-      <AppRoutes />
+      <AppRoutes bufferSizeSec={bufferSizeSec}/>
     </WebSocketProvider>
   );
 }

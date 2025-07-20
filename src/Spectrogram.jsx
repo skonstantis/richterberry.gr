@@ -81,15 +81,6 @@ function computeSpectrogram(buffer, windowSize, hopSize, sampleRate) {
       zsmooth: "best",
       zmin: 0,
       zmax: 1000,
-      colorbar: {
-        x: 1.1,
-        xanchor: "right",
-        ticklabelposition: "outside",
-        tickfont: {
-          color: "#888",
-          size: 11,
-        },
-      },
       showscale: false,
     });
   }
@@ -97,7 +88,7 @@ function computeSpectrogram(buffer, windowSize, hopSize, sampleRate) {
   return allTraces;
 }
 
-export function Spectrogram({ buffer, virtualNow }) {
+export function Spectrogram({ buffer, virtualNow, bufferSizeSec }) {
   const containerRef = useRef(null);
   const [width, setWidth] = useState(850);
 
@@ -124,12 +115,15 @@ export function Spectrogram({ buffer, virtualNow }) {
 
   const tickvals = useMemo(() => {
     const vals = [];
-    const start = Math.floor((virtualNow - 30) / 5) * 5;
-    for (let i = 0; i < 7; i++) {
-      vals.push(start + i * 5);
+    const tickEvery = bufferSizeSec === 30 ? 5 : 15;
+    const ticksCount = Math.floor(bufferSizeSec / tickEvery);
+    const start = Math.floor((virtualNow - bufferSizeSec) / tickEvery) * tickEvery;
+
+    for (let i = 0; i <= ticksCount; i++) {
+      vals.push(start + i * tickEvery);
     }
     return vals;
-  }, [virtualNow]);
+  }, [virtualNow, bufferSizeSec]);
 
   const ticktext = useMemo(() => {
     return tickvals.map((ts) =>
@@ -147,9 +141,8 @@ export function Spectrogram({ buffer, virtualNow }) {
       <Plot
         data={traces}
         layout={{
-           plot_bgcolor: 'transparent', 
-           paper_bgcolor: 'transparent',
-          title: "Spectrogram",
+          plot_bgcolor: "transparent",
+          paper_bgcolor: "transparent",
           width,
           height: 300,
           xaxis: {
@@ -166,9 +159,9 @@ export function Spectrogram({ buffer, virtualNow }) {
               color: "#888",
               size: 11,
             },
-            showgrid: false,    
+            showgrid: false,
             zeroline: false,
-            range: [virtualNow - 30, virtualNow],
+            range: [virtualNow - bufferSizeSec - 1, virtualNow + 1],
             tickmode: "array",
             tickvals,
             ticktext,
@@ -188,7 +181,36 @@ export function Spectrogram({ buffer, virtualNow }) {
             showgrid: false,
             zeroline: false,
           },
-          margin: { t: 0, l: 20, r: 20, b: 40 },
+          shapes: [
+            {
+              type: "line",
+              x0: virtualNow,
+              x1: virtualNow,
+              y0: 0,
+              y1: 1,
+              xref: "x",
+              yref: "paper",
+              line: {
+                color: "red",
+                width: 1,
+                dash: "dot",
+              },
+            },
+          ],
+          annotations: [
+            {
+              x: virtualNow,
+              y: 1.05,
+              xref: "x",
+              yref: "paper",
+              showarrow: false,
+              text: "<span style='font-weight: 200; font-size: 10px; color: red;'>Now</span>",
+              xanchor: "center",
+              yanchor: "bottom",
+              yshift: -5,
+            },
+          ],
+          margin: { t: 50, l: 20, r: 35, b: 40 },
           showlegend: false,
         }}
         config={{

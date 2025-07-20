@@ -16,7 +16,7 @@ const WebSocketContext = createContext({
 
 export const useWebSocket = () => useContext(WebSocketContext);
 
-export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
+export function WebSocketProvider({ url, children, bufferSizeSec }) {
   const ws = useRef(null);
 
   const [isConnecting, setIsConnecting] = useState(true);
@@ -103,7 +103,6 @@ export function WebSocketProvider({ url, children, bufferSizeSec = 30 }) {
           stationsRef.current = data.stations;
         }
         if (stationsRef.current && data.type === "station_status") {
-          console.log(data);
             stationsRef.current = stationsRef.current.map((s) =>
               s.id === data.station_id
                 ? { ...s, connected: data.connected }

@@ -7,34 +7,53 @@ function reducer(state, action) {
     case 'SET_VIRTUAL_NOW':
       return { ...state, virtualNow: action.payload };
 
-    case 'ADD_BATCH': {
-      const { batch, bufferSizeSec, isHistory } = action.payload;
-      if (!Array.isArray(batch) || batch.length === 0) return state;
-
-      const batchLastTimestamp = batch[batch.length - 1].timestamp;
-
-      const batchTimestamps = new Set(batch.map(item => item.timestamp));
-      const bufferWithoutDuplicates = state.buffer.filter(
-        item => !batchTimestamps.has(item.timestamp)
-      );
-
-      const combined = [...bufferWithoutDuplicates, ...batch].sort(
-        (a, b) => a.timestamp - b.timestamp
-      );
-
-      const pruned = combined.filter(
-        item => (batchLastTimestamp - item.timestamp) <= bufferSizeSec
-      );
-
-      const newVirtualNow = isHistory
-        ? Math.max(state.virtualNow, batchLastTimestamp)
-        : batchLastTimestamp;
-
-      return {
-        buffer: pruned,
-        virtualNow: newVirtualNow,
-      };
-    }
+      case 'ADD_BATCH': {
+        const { batch, bufferSizeSec, isHistory } = action.payload;
+        if (!Array.isArray(batch) || batch.length === 0) return state;
+      
+        let filteredBatch = batch;
+        let sampleCounter = state.sampleCounter ?? 0;
+      
+        console.log(bufferSizeSec);
+        if (bufferSizeSec === 300 && !isHistory) {
+          // Decimation logic: keep every 5th sample except when value >= 10
+          filteredBatch = [];
+          for (const item of batch) {
+            if (sampleCounter % 5 === 0 || item.value >= 10) {
+              filteredBatch.push(item);
+            }
+            sampleCounter += 1;
+          }
+        }
+      
+        if (filteredBatch.length === 0) return state; 
+      
+        const batchLastTimestamp = filteredBatch[filteredBatch.length - 1].timestamp;
+      
+        const batchTimestamps = new Set(filteredBatch.map(item => item.timestamp));
+        const bufferWithoutDuplicates = state.buffer.filter(
+          item => !batchTimestamps.has(item.timestamp)
+        );
+      
+        const combined = [...bufferWithoutDuplicates, ...filteredBatch].sort(
+          (a, b) => a.timestamp - b.timestamp
+        );
+      
+        const pruned = combined.filter(
+          item => (batchLastTimestamp - item.timestamp) <= bufferSizeSec
+        );
+      
+        const newVirtualNow = isHistory
+          ? Math.max(state.virtualNow, batchLastTimestamp)
+          : batchLastTimestamp;
+      
+        return {
+          ...state,
+          buffer: pruned,
+          virtualNow: newVirtualNow,
+          sampleCounter: bufferSizeSec === 300 ? sampleCounter : state.sampleCounter, 
+        };
+      }      
 
     case 'TICK': {
       const { bufferSizeSec, elapsed } = action.payload;

@@ -2,7 +2,7 @@ import React, { useMemo, useState, useRef, useLayoutEffect } from "react";
 import UplotReact from "uplot-react";
 import "uplot/dist/uPlot.min.css";
 
-function SeismoPlot({ buffer, virtualNow }) {
+function SeismoPlot({ buffer, virtualNow, bufferSizeSec }) {
   const containerRef = useRef(null);
   const [width, setWidth] = useState(300); 
 
@@ -20,7 +20,7 @@ function SeismoPlot({ buffer, virtualNow }) {
     return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
-  const startTime = virtualNow - 30;
+  const startTime = virtualNow - bufferSizeSec;
   const maxGap = 0.1;
 
   const [timestamps, values] = useMemo(() => {
@@ -107,11 +107,19 @@ function SeismoPlot({ buffer, virtualNow }) {
         labelGap: 8,
         ticks: {
           values: (min, max) => {
+            const tickEvery = bufferSizeSec == 30 ? 5 : 15;
+            const start = Math.floor(min / tickEvery) * tickEvery;
+            const end = Math.ceil(max / tickEvery) * tickEvery;
+        
             const vals = [];
-            for (let v = Math.ceil(min / 5) * 5; v <= max; v += 5) vals.push(v);
+            for (let v = start; v <= end; v += tickEvery) vals.push(v);
             return vals;
           },
-        },
+          stroke: "#888",    
+          width: 0.5,          
+          size: 5,          
+        },        
+        
         values: (u, vals) => vals.map(v => {
           const date = new Date(v * 1000);
           return date.toLocaleTimeString(undefined, { hour12: false });

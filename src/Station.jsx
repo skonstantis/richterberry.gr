@@ -8,7 +8,8 @@ import styles from "./stationInfo.module.css";
 import SeismoPlot from "./SeismoPlot";
 import Spectrogram from "./Spectrogram";
 
-function Station() {
+function Station({bufferSizeSec}) {
+
   const modeClasses = {
     Testing: styles.modeTesting,
     Deployed: styles.modeDeployed,
@@ -53,11 +54,8 @@ function Station() {
     return <Page404 />;
   }
 
-  const isBufferEmpty = !buffer || buffer.length === 0;
-
   return (
     <div className={styles.wrapper}>
-      {/* Wrap info and status side by side */}
       <div className={styles.infoAndStatus}>
         <div>
           <div className={styles.row}>
@@ -136,13 +134,13 @@ function Station() {
       {buffer && buffer.length > 0 && (
         <>
           <div className={styles.seismoPlotWrapper}>
-            <SeismoPlot buffer={buffer} virtualNow={virtualNow} />
+            <SeismoPlot buffer={buffer} virtualNow={virtualNow} bufferSizeSec={bufferSizeSec}/>
           </div>
           <div className={styles.seismoPlotWrapper}>
             <Spectrogram
               buffer={buffer}
               virtualNow={virtualNow}
-              bufferSizeSec={30}
+              bufferSizeSec={bufferSizeSec}
             />
           </div>
         </>
