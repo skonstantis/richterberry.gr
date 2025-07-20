@@ -78,7 +78,8 @@ function SeismoPlot({ buffer, virtualNow, bufferSizeSec }) {
         ctx.setLineDash([]);
 
         ctx.fillStyle = "#f00";
-        ctx.font = "12px sans-serif";
+        const fontSize = Math.max(12, u.bbox.height * 0.04); 
+        ctx.font = `bold ${fontSize}px sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
         ctx.fillText("Now", xPos, top - 5);
