@@ -4,7 +4,7 @@ import { PageLoading } from "./PageLoading";
 import { PageServerError } from "./PageServerError";
 import { PageUnableToConnect } from "./PageUnableToConnect";
 import { useWebSocket } from "./WebSocketProvider";
-import styles from "./stationInfo.module.css";
+import styles from "./station.module.css";
 import SeismoPlot from "./SeismoPlot";
 import Spectrogram from "./Spectrogram";
 
