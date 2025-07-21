@@ -211,7 +211,8 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
                       <strong>5m @ 50Hz</strong>
                       <br />Extended duration<br /> Medium resolution
                       <br />
-                      <em>Spikes: 250Hz</em>
+                      <br />
+                      <em>Spikes: Always 250Hz</em>
                     </span>
                   </div>
                 </div>
