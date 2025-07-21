@@ -203,13 +203,13 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
                     <span>
                       <strong>30s @ 250Hz</strong> 
                       <br/>
-                      Short Duration, High resolution
+                      Short Duration<br /> High resolution
                     </span>
                   </div>
                   <div className={styles.tooltipItem}>
                     <span>
                       <strong>5m @ 50Hz</strong>
-                      <br />Extended duration, Medium resolution
+                      <br />Extended duration<br /> Medium resolution
                       <br />
                       <em>Spikes still shown at 250Hz</em>
                     </span>
@@ -220,7 +220,7 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
           </div>
 
           <div className={styles.inlineLabel}>
-  <span className={styles.title}>Plot</span>
+  <span className={styles.title}>Amplitude Plot</span>
 
   <div className={styles.tooltipWrapper}>
     <img
