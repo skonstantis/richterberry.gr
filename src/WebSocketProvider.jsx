@@ -26,7 +26,7 @@ export function WebSocketProvider({ url, children, bufferSizeSec }) {
   const [stations, setStations] = useState(null);
   const stationsRef = useRef(null);
 
-  const { addBatch, buffer, virtualNow } = useBuffer(bufferSizeSec, firstMessage);
+  const { addBatch, buffer, virtualNow } = useBuffer(bufferSizeSec, firstMessage, stations);
 
   const stationTimeoutRef = useRef(null);
 

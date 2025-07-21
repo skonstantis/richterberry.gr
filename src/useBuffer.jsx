@@ -8,13 +8,12 @@ function reducer(state, action) {
       return { ...state, virtualNow: action.payload };
 
       case 'ADD_BATCH': {
-        const { batch, bufferSizeSec, isHistory } = action.payload;
+        const { batch, bufferSizeSec, isHistory, isOffline } = action.payload;
         if (!Array.isArray(batch) || batch.length === 0) return state;
       
         let filteredBatch = batch;
         let sampleCounter = state.sampleCounter ?? 0;
       
-        console.log(bufferSizeSec);
         if (bufferSizeSec === 300 && !isHistory) {
           // Decimation logic: keep every 5th sample except when value >= 10
           filteredBatch = [];
@@ -43,7 +42,7 @@ function reducer(state, action) {
           item => (batchLastTimestamp - item.timestamp) <= bufferSizeSec
         );
       
-        const newVirtualNow = isHistory
+        const newVirtualNow = isOffline ? Date.now() / 1000 : isHistory
           ? Math.max(state.virtualNow, batchLastTimestamp)
           : batchLastTimestamp;
       
@@ -77,7 +76,7 @@ function reducer(state, action) {
   }
 }
 
-export function useBuffer(bufferSizeSec, firstMessage) {
+export function useBuffer(bufferSizeSec, firstMessage, stations) {
   const [state, dispatch] = useReducer(reducer, {
     buffer: [],
     virtualNow: -Infinity,
@@ -128,18 +127,19 @@ export function useBuffer(bufferSizeSec, firstMessage) {
     };
   }, [state.virtualNow, state.buffer.length, isDocumentVisible, bufferSizeSec]);
 
-  const addBatch = useCallback((batch, isHistory = false) => {
+  const addBatch = useCallback((batch, isHistory = false, isOffline = false) => {
     dispatch({
       type: 'ADD_BATCH',
       payload: {
         batch,
         isHistory,
         bufferSizeSec,
+        isOffline 
       },
     });
   }, [bufferSizeSec]);
 
-  const fetchHistory = useCallback(async () => {
+  const fetchHistory = useCallback(async (isOffline = false) => {
     try {
       console.log(window.location.pathname.replace("/", ""));
       const response = await fetch('https://seismologos.shop/' + window.location.pathname.replace("/", "") + bufferSizeSec);
@@ -150,7 +150,7 @@ export function useBuffer(bufferSizeSec, firstMessage) {
 
       const data = await response.json();
       if (Array.isArray(data.samples)) {
-        addBatch(data.samples, true);
+        addBatch(data.samples, true, isOffline);
       } else {
         console.warn('Invalid response format: no "samples" array');
       }
@@ -160,10 +160,17 @@ export function useBuffer(bufferSizeSec, firstMessage) {
   }, [addBatch]);
 
   useEffect(() => {
+    const station = stations ? stations.find(
+      (station) => station.name === window.location.pathname.replace("/", "")
+    ) : null;
     if (firstMessage) {
       fetchHistory();
     }
-  }, [firstMessage, fetchHistory]);
+    else if((station && station.connected == false))
+    {
+      fetchHistory(true);
+    }
+  }, [firstMessage, fetchHistory, stations]);
 
   return {
     addBatch,
