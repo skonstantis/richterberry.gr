@@ -191,9 +191,7 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
         </div>
       </div>
 
-      {buffer && buffer.length > 0 && (
-        <>
-          <div className={styles.bufferControls}>
+      <div className={styles.bufferControls}>
             <div className={styles.buttonGroup}>
               <button
                 className={`${styles.bufferButton} ${
@@ -244,7 +242,8 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
               </div>
             </div>
           </div>
-
+      {buffer && buffer.length > 0 && (
+        <>
           <div className={styles.inlineLabel}>
   <span className={styles.title}>Amplitude Plot</span>
 
