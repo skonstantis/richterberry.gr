@@ -201,15 +201,16 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
                 <div className={styles.tooltip}>
                   <div className={styles.tooltipItem}>
                     <span>
-                      <strong>30s @ 250Hz</strong> High-resolution recording
+                      <strong>30s @ 250Hz</strong> 
+                      Short Duration, High resolution
                     </span>
                   </div>
                   <div className={styles.tooltipItem}>
                     <span>
-                      <strong>5m @ 50Hz</strong> Extended duration at medium
-                      resolution
+                      <strong>5m @ 50Hz</strong>
+                      <br />Extended duratio, Medium resolution
                       <br />
-                      <em>Recognized events still shown at 250Hz</em>
+                      <em>Spikes still shown at 250Hz</em>
                     </span>
                   </div>
                 </div>
