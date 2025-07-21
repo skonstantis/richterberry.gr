@@ -126,15 +126,16 @@ export function Spectrogram({ buffer, virtualNow, bufferSizeSec }) {
   }, [virtualNow, bufferSizeSec]);
 
   const ticktext = useMemo(() => {
-    return tickvals.map((ts) =>
-      new Date(ts * 1000).toLocaleTimeString(undefined, {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      })
-    );
-  }, [tickvals]);
+    return tickvals.map((ts) => {
+      const date = new Date(ts * 1000);
+      const sec = date.getUTCSeconds();
+      if ((bufferSizeSec == 300 && sec === 0) || (bufferSizeSec == 30 && sec % 10 == 0)) {
+        return date.toLocaleTimeString(undefined, {
+          hour12: false,
+        });
+      }
+      return ""; 
+    })});
 
   return (
     <div ref={containerRef} style={{ width: "100%", marginBottom: "-5px", marginLeft: "10px" }}>

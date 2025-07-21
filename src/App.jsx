@@ -19,7 +19,7 @@ function AppContent() {
   const location = useLocation();
   const [bufferSizeSec, setBufferSizeSec] = useState(() => {
     const saved = localStorage.getItem("bufferSizeSec");
-    return saved ? Number(saved) : 30; 
+    return saved ? Number(saved) : 300; 
   });
 
   return (

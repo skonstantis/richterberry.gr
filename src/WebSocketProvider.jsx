@@ -98,18 +98,6 @@ export function WebSocketProvider({ url, children, bufferSizeSec }) {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.type === "stations") {
-          setStations(data.stations);
-          stationsRef.current = data.stations;
-        }
-        if (stationsRef.current && data.type === "station_status") {
-            stationsRef.current = stationsRef.current.map((s) =>
-              s.id === data.station_id
-                ? { ...s, connected: data.connected }
-                : s
-            );
-            setStations([...stationsRef.current]);
-        }
         if (stationsRef.current && data.type === "data") {
           if (!firstMessage) setFirstMessage(true);
           refreshStationTimeout();
@@ -117,6 +105,21 @@ export function WebSocketProvider({ url, children, bufferSizeSec }) {
           if (Array.isArray(data.samples) && data.samples.length > 0) {
             addBatch(data.samples);
           }
+        }
+        if (stationsRef.current && data.type === "station_status") {
+          stationsRef.current = stationsRef.current.map((s) =>
+            s.id === data.station_id
+              ? { ...s, connected: data.connected }
+              : s
+          );
+          setStations([...stationsRef.current]);
+        }
+        if (stationsRef.current && data.type === "stations_max") {
+          console.log(data);
+        }
+        if (data.type === "stations") {
+          setStations(data.stations);
+          stationsRef.current = data.stations;
         }
       } catch (err) {
         console.error("Failed to parse WebSocket message", err);

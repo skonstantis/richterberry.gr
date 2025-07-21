@@ -107,24 +107,18 @@ function SeismoPlot({ buffer, virtualNow, bufferSizeSec }) {
         labelFont: "bold 12px sans-serif",
         labelGap: 8,
         ticks: {
-          values: (min, max) => {
-            const tickEvery = bufferSizeSec == 30 ? 5 : 15;
-            const start = Math.floor(min / tickEvery) * tickEvery;
-            const end = Math.ceil(max / tickEvery) * tickEvery;
-        
-            const vals = [];
-            for (let v = start; v <= end; v += tickEvery) vals.push(v);
-            return vals;
-          },
           stroke: "#888",    
           width: 0.5,          
           size: 5,          
         },        
         
         values: (u, vals) => vals.map(v => {
-          const date = new Date(v * 1000);
-          return date.toLocaleTimeString(undefined, { hour12: false });
-        }),
+        if (bufferSizeSec == 300 && (v % 60 !== 0)) return "";
+        if (bufferSizeSec == 30 && (v % 10 !== 0)) return "";
+        const date = new Date(v * 1000);
+        return date.toLocaleTimeString(undefined, { hour12: false });
+      }),
+
       },
       {
         stroke: "#888",
