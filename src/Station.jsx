@@ -149,6 +149,31 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
               >
                 <img src={"./gps.svg"} alt="GPS" className={styles.gpsIcon} />
                 {info.connected ? "Synced" : "Unsynced"}
+                <div className={styles.tooltipWrapper}>
+                <img
+                  src={"./questionmark.svg"}
+                  alt="Questionmark"
+                  className={styles.questionmarkIcon}
+                />
+                <div className={styles.tooltip}>
+                  <div className={styles.tooltipItem}>
+                    <span>
+                      <strong>Synced</strong> 
+                      <br/>
+                      Station timestamps samples using GPS;<br /> Timestamps are extremely accurate
+                    </span>
+                  </div>
+                  <div className={styles.tooltipItem}>
+                    <span>
+                      <strong>Unsynced</strong>
+                      <br />Station timestamps samples using internal clock;<br /> Timestamps are less accurate
+                      <br />
+                      <br />
+                      <em>Data across all GPS-synced stations can be<br /> used to accurately calculate the parameters of an<br /> earthuake and compared weith other networks</em>
+                    </span>
+                  </div>
+                </div>
+              </div>
               </div>
             )}
           </div>
@@ -212,7 +237,7 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
                       <br />Extended duration<br /> Medium resolution
                       <br />
                       <br />
-                      <em>Spikes: Always 250Hz</em>
+                      <em><strong>Spikes:</strong> Always 250Hz</em>
                     </span>
                   </div>
                 </div>
