@@ -17,19 +17,6 @@
   align-items: center;
 }
 
-.statusWrapper {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  background-color: rgba(135, 135, 135, 0.7);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  border: 0.5px solid rgba(255, 255, 255, 0.5);
-  width: fit-content;
-  border-radius: 16px;
-  gap: 10px;
-  padding: 5px 10px;
-}
-
 .row {
   display: flex;
   gap: 10px;
@@ -46,8 +33,18 @@
   margin-right: 5px;
 }
 
-.settingsIcon {
+.modeIcon {
   width: 16px;
+  margin-right: 5px;
+}
+
+.gpsIcon {
+  width: 16px;
+  margin-right: 5px;
+}
+
+.stationIcon {
+  width: 22px;
   margin-right: 5px;
 }
 
@@ -86,6 +83,32 @@
   align-items: center;
 }
 
+.statusOnline {
+  background-color: #7bb661;
+  color: white;
+  width: fit-content;
+  padding: 3px 7px;
+  margin: 0 0 10px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.statusOffline {
+  background-color: #b04a4a;
+  color: white;
+  width: fit-content;
+  padding: 3px 7px;
+  margin: 0 0 10px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
 .stationWrapper {
   color: white;
   font-size: 36px;
@@ -96,11 +119,6 @@
 .stationType {
   color: #db6f87;
   font-size: 20px;
-}
-
-.statusIcons {
-  height: 30px;
-  padding: 5px;
 }
 
 .seismoPlotWrapper {
@@ -119,11 +137,6 @@
     flex-direction: column;
     align-items: flex-start;
   }
-
-  .statusWrapper {
-    margin-top: 20px;
-    box-sizing: border-box;
-  }
 }
 
 @media (max-width: 465px) {
@@ -131,3 +144,35 @@
     font-size: 14px;
   }
 }
+
+.bufferControls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+}
+
+.bufferButton {
+  background: rgba(135, 135, 135, 0.2);
+  color: #eee;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: background 0.2s, transform 0.1s;
+}
+
+.bufferButton:hover {
+  background: rgba(135, 135, 135, 0.4);
+}
+
+.bufferButton.active {
+  background: rgba(135, 135, 135, 0.6); 
+}
+

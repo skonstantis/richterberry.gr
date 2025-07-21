@@ -1,6 +1,10 @@
+import { useEffect } from "react";
 import styles from "./howItWorks.module.css";
 
 function HowItWorks() {
+  useEffect(() => {
+    document.title = "How It Works - RichterBerry";
+  }, []);
   return (
     <div className={styles.container}>
       <h1>How It Works</h1>
@@ -100,11 +104,11 @@ function HowItWorks() {
         Designed for speed and clarity, the client renders live waveform plots
         and spectrograms that update continuously with near-zero latency. It
         displays a visual of the last 30 seconds of seismic activity only,
-        giving users an immediate snapshot of current ground vibrations. For
-        now, users cannot access data older than 30 seconds. The client also
-        shows the health status of the entire pipeline for the selected station,
-        allowing users to monitor seismic activity as it happens with smooth,
-        responsive visuals.
+        giving users an immediate snapshot of current ground vibrations. 
+        Users have access data streams of 30 seconds at 250hz and 5 minutes 
+        at 50hz. The client also shows the health status of the entire pipeline 
+        for the selected station, allowing users to monitor seismic activity as 
+        it happens with smooth, responsive visuals.
       </p>
 
       <p>

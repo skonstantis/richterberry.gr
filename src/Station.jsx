@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Page404 } from "./Page404";
 import { PageLoading } from "./PageLoading";
-import { PageServerError } from "./PageServerError";
+import { PageError } from "./PageError";
 import { PageUnableToConnect } from "./PageUnableToConnect";
 import { useWebSocket } from "./WebSocketProvider";
 import styles from "./station.module.css";
 import SeismoPlot from "./SeismoPlot";
 import Spectrogram from "./Spectrogram";
 
-function Station({bufferSizeSec}) {
-
+function Station({ bufferSizeSec, setBufferSizeSec }) {
   const modeClasses = {
     Testing: styles.modeTesting,
     Deployed: styles.modeDeployed,
@@ -20,6 +19,22 @@ function Station({bufferSizeSec}) {
     useWebSocket();
 
   const [timedOut, setTimedOut] = useState(false);
+
+  const info = stations
+    ? stations.find(
+        (station) => station.name === window.location.pathname.replace("/", "")
+      )
+    : null;
+
+  useEffect(() => {
+    if (info && info.name) {
+      const capitalized =
+        info.name.charAt(0).toUpperCase() + info.name.slice(1);
+      document.title = `${capitalized} - RichterBerry`;
+    } else {
+      document.title = "RichterBerry";
+    }
+  }, [info]);
 
   useEffect(() => {
     if (stations || !isConnecting) {
@@ -34,8 +49,8 @@ function Station({bufferSizeSec}) {
     return () => clearTimeout(timeoutId);
   }, [isConnecting, stations]);
 
-  if (timedOut) {
-    return <PageServerError />;
+  if (timedOut || !(bufferSizeSec === 30 || bufferSizeSec === 300)) {
+    return <PageError />;
   }
 
   if (isConnecting || !stations) {
@@ -45,10 +60,6 @@ function Station({bufferSizeSec}) {
   if (!connected && !isConnecting) {
     return <PageUnableToConnect />;
   }
-
-  const info = stations.find(
-    (station) => station.name === window.location.pathname.replace("/", "")
-  );
 
   if (info == null) {
     return <Page404 />;
@@ -75,10 +86,36 @@ function Station({bufferSizeSec}) {
               <img
                 src={"./mode-icon.svg"}
                 alt="Mode"
-                className={styles.settingsIcon}
+                className={styles.modeIcon}
               />
               {info.mode}
             </div>
+          </div>
+          <div className={styles.row}>
+            <div
+              className={
+                info.connected ? styles.statusOnline : styles.statusOffline
+              }
+            >
+               <img
+                src={"./station.svg"}
+                alt="GPS"
+                className={styles.stationIcon}
+              />
+              {info.connected ? "Online" : "Offline"}
+            </div>
+            {info.connected && gpsSynced && <div
+              className={
+                gpsSynced ? styles.statusOnline : styles.statusOffline
+              }
+            >
+              <img
+                src={"./gps.svg"}
+                alt="GPS"
+                className={styles.gpsIcon}
+              />
+              {info.connected ? "Synced" : "Unsynced"}
+            </div>}
           </div>
           <div className={styles.row}>
             <div className={styles.stationWrapper}>
@@ -92,49 +129,43 @@ function Station({bufferSizeSec}) {
           </div>
           <div className={styles.stationType}>{info.type}</div>
         </div>
-
-        <div className={styles.statusWrapper}>
-          {connected && (
-            <div>
-              {info.connected ? (
-                <img
-                  src={"./station-connected.svg"}
-                  alt="Station"
-                  className={styles.statusIcons}
-                />
-              ) : (
-                <img
-                  src={"./station-disconnected.svg"}
-                  alt="Station"
-                  className={styles.statusIcons}
-                />
-              )}
-            </div>
-          )}
-          {connected && info.connected && (
-            <div>
-              {gpsSynced ? (
-                <img
-                  src={"./gps-connected.svg"}
-                  alt="GPS"
-                  className={styles.statusIcons}
-                />
-              ) : (
-                <img
-                  src={"./gps-disconnected.svg"}
-                  alt="GPS"
-                  className={styles.statusIcons}
-                />
-              )}
-            </div>
-          )}
-        </div>
       </div>
 
       {buffer && buffer.length > 0 && (
         <>
+          <div className={styles.bufferControls}>
+            <div className={styles.buttonGroup}>
+              <button
+                className={`${styles.bufferButton} ${
+                  bufferSizeSec === 30 ? styles.active : ""
+                }`}
+                onClick={() => {
+                  setBufferSizeSec(30);
+                  localStorage.setItem("bufferSizeSec", "30");
+                }}
+              >
+                30s @ 250Hz
+              </button>
+              <button
+                className={`${styles.bufferButton} ${
+                  bufferSizeSec === 300 ? styles.active : ""
+                }`}
+                onClick={() => {
+                  setBufferSizeSec(300);
+                  localStorage.setItem("bufferSizeSec", "300");
+                }}
+              >
+                5m @ 50Hz
+              </button>
+            </div>
+          </div>
+
           <div className={styles.seismoPlotWrapper}>
-            <SeismoPlot buffer={buffer} virtualNow={virtualNow} bufferSizeSec={bufferSizeSec}/>
+            <SeismoPlot
+              buffer={buffer}
+              virtualNow={virtualNow}
+              bufferSizeSec={bufferSizeSec}
+            />
           </div>
           <div className={styles.seismoPlotWrapper}>
             <Spectrogram
