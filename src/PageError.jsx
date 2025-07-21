@@ -6,7 +6,7 @@ export function PageError() {
       <div className={styles.notFound}>
         <h1>Error</h1>
         <p>Something went wrong.</p>
-        <p>Please try refreshing or contact support if the issue persists.</p>
+        <p>Please try refreshing or tray again later if the issue persists.</p>
       </div>
     </div>
   );

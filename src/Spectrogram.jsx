@@ -72,9 +72,11 @@ function computeSpectrogram(buffer, windowSize, hopSize, sampleRate) {
 
     const z = freqAxis.map((_, fi) => spectrogram.map((row) => row[fi]));
 
+    const timeAxisDates = timeAxis.map((ts) => new Date(ts * 1000));
+
     allTraces.push({
       z,
-      x: timeAxis,
+      x: timeAxisDates,
       y: freqAxis,
       type: "heatmap",
       colorscale: "Jet",
@@ -113,28 +115,12 @@ export function Spectrogram({ buffer, virtualNow, bufferSizeSec }) {
     return computeSpectrogram(buffer, windowSize, hopSize, sampleRate);
   }, [buffer]);
 
-  const tickvals = useMemo(() => {
-    const vals = [];
-    const tickEvery = bufferSizeSec === 30 ? 5 : 15;
-    const ticksCount = Math.floor(bufferSizeSec / tickEvery);
-    const start = Math.floor((virtualNow - bufferSizeSec) / tickEvery) * tickEvery;
-
-    for (let i = 0; i <= ticksCount; i++) {
-      vals.push(start + i * tickEvery);
-    }
-    return vals;
+  const xRange = useMemo(() => {
+    return [
+      new Date((virtualNow - bufferSizeSec - 1) * 1000),
+      new Date((virtualNow + 1) * 1000),
+    ];
   }, [virtualNow, bufferSizeSec]);
-
-  const ticktext = useMemo(() => {
-    return tickvals.map((ts) =>
-      new Date(ts * 1000).toLocaleTimeString(undefined, {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      })
-    );
-  }, [tickvals]);
 
   return (
     <div ref={containerRef} style={{ width: "100%", marginBottom: "-5px", marginLeft: "10px" }}>
@@ -146,6 +132,7 @@ export function Spectrogram({ buffer, virtualNow, bufferSizeSec }) {
           width,
           height: 300,
           xaxis: {
+            type: "date",
             title: {
               text: "Time",
               font: {
@@ -161,10 +148,9 @@ export function Spectrogram({ buffer, virtualNow, bufferSizeSec }) {
             },
             showgrid: false,
             zeroline: false,
-            range: [virtualNow - bufferSizeSec - 1, virtualNow + 1],
-            tickmode: "array",
-            tickvals,
-            ticktext,
+            range: xRange,
+            tickformat: "%H:%M:%S",
+            dtick: 15000, 
           },
           yaxis: {
             title: {
@@ -184,8 +170,8 @@ export function Spectrogram({ buffer, virtualNow, bufferSizeSec }) {
           shapes: [
             {
               type: "line",
-              x0: virtualNow,
-              x1: virtualNow,
+              x0: new Date(virtualNow * 1000),
+              x1: new Date(virtualNow * 1000),
               y0: 0,
               y1: 1,
               xref: "x",
@@ -199,7 +185,7 @@ export function Spectrogram({ buffer, virtualNow, bufferSizeSec }) {
           ],
           annotations: [
             {
-              x: virtualNow,
+              x: new Date(virtualNow * 1000),
               y: 1.05,
               xref: "x",
               yref: "paper",

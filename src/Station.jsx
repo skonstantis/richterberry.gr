@@ -12,7 +12,7 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
   const modeClasses = {
     Testing: styles.modeTesting,
     Deployed: styles.modeDeployed,
-    Retired: styles.modeRetired,
+    Maintenance: styles.modeMaintenance,
   };
 
   const { connected, isConnecting, gpsSynced, stations, buffer, virtualNow } =
@@ -89,6 +89,43 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
                 className={styles.modeIcon}
               />
               {info.mode}
+
+              <div className={styles.tooltipWrapper}>
+                <img
+                  src={"./questionmark.svg"}
+                  alt="Questionmark"
+                  className={styles.questionmarkIcon}
+                />
+                <div className={styles.tooltip}>
+                  <div className={styles.tooltipItem}>
+                    <span
+                      className={`${styles.tooltipBadge} ${styles.modeTesting}`}
+                    ></span>
+                    <span>
+                      <strong>Testing</strong> Vibrations may be artificial or
+                      ambient
+                    </span>
+                  </div>
+                  <div className={styles.tooltipItem}>
+                    <span
+                      className={`${styles.tooltipBadge} ${styles.modeDeployed}`}
+                    ></span>
+                    <span>
+                      <strong>Deployed</strong> Operational in the field;
+                      reliable data
+                    </span>
+                  </div>
+                  <div className={styles.tooltipItem}>
+                    <span
+                      className={`${styles.tooltipBadge} ${styles.modeMaintenance}`}
+                    ></span>
+                    <span>
+                      <strong>Maintenance</strong> Temporarily offline; being
+                      repaired
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div className={styles.row}>
@@ -97,25 +134,23 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
                 info.connected ? styles.statusOnline : styles.statusOffline
               }
             >
-               <img
+              <img
                 src={"./station.svg"}
                 alt="GPS"
                 className={styles.stationIcon}
               />
               {info.connected ? "Online" : "Offline"}
             </div>
-            {info.connected && gpsSynced && <div
-              className={
-                gpsSynced ? styles.statusOnline : styles.statusOffline
-              }
-            >
-              <img
-                src={"./gps.svg"}
-                alt="GPS"
-                className={styles.gpsIcon}
-              />
-              {info.connected ? "Synced" : "Unsynced"}
-            </div>}
+            {info.connected && gpsSynced && (
+              <div
+                className={
+                  gpsSynced ? styles.statusOnline : styles.statusOffline
+                }
+              >
+                <img src={"./gps.svg"} alt="GPS" className={styles.gpsIcon} />
+                {info.connected ? "Synced" : "Unsynced"}
+              </div>
+            )}
           </div>
           <div className={styles.row}>
             <div className={styles.stationWrapper}>
@@ -157,8 +192,51 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
               >
                 5m @ 50Hz
               </button>
+              <div className={styles.tooltipWrapper}>
+                <img
+                  src={"./questionmark.svg"}
+                  alt="Questionmark"
+                  className={styles.questionmarkIcon}
+                />
+                <div className={styles.tooltip}>
+                  <div className={styles.tooltipItem}>
+                    <span>
+                      <strong>30s @ 250Hz</strong> High-resolution recording
+                    </span>
+                  </div>
+                  <div className={styles.tooltipItem}>
+                    <span>
+                      <strong>5m @ 50Hz</strong> Extended duration at medium
+                      resolution
+                      <br />
+                      <em>Recognized events still shown at 250Hz</em>
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          <div className={styles.inlineLabel}>
+  <span className={styles.title}>Plot</span>
+
+  <div className={styles.tooltipWrapper}>
+    <img
+      src={"./questionmark.svg"}
+      alt="Questionmark"
+      className={styles.questionmarkIcon}
+    />
+    <div className={styles.tooltip}>
+  <div className={styles.tooltipItem}>
+    <em>
+      Look for sudden spikes in the graph
+      <br />Those usually indicate an earthquake 
+    </em>
+  </div>
+</div>
+
+  </div>
+</div>
 
           <div className={styles.seismoPlotWrapper}>
             <SeismoPlot
@@ -167,6 +245,28 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
               bufferSizeSec={bufferSizeSec}
             />
           </div>
+          <div className={styles.inlineLabel}>
+  <span className={styles.title}>Spectrogram</span>
+
+  <div className={styles.tooltipWrapper}>
+    <img
+      src={"./questionmark.svg"}
+      alt="Questionmark"
+      className={styles.questionmarkIcon}
+    />
+    <div className={styles.tooltip}>
+  <div className={styles.tooltipItem}>
+    <em>
+    Brighter red bands show stronger vibrations
+    <br />
+     at specific frequencies and times
+      <br />
+      Blue areas mean little or no activity
+    </em>
+  </div>
+</div>
+  </div>
+</div>
           <div className={styles.seismoPlotWrapper}>
             <Spectrogram
               buffer={buffer}
