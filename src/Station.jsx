@@ -242,6 +242,9 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
               </div>
             </div>
           </div>
+      {buffer && buffer.length == 0 && (
+        <div className={styles.bufferEmpty}>Data will be displayed here when available...</div>
+      )}
       {buffer && buffer.length > 0 && (
         <>
           <div className={styles.inlineLabel}>

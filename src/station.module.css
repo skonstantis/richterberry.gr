@@ -234,6 +234,11 @@
   white-space: nowrap;
 }
 
+.bufferEmpty
+{
+  font-size: 22px;
+  font-weight: bold;
+}
 
 @media (max-width: 465px) {
   .tooltipItem {

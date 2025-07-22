@@ -1,6 +1,5 @@
 import { useReducer, useEffect, useRef, useCallback, useState } from 'react';
 
-const tickMs = 250;
 
 function reducer(state, action) {
   switch (action.type) {
@@ -107,7 +106,7 @@ export function useBuffer(bufferSizeSec, firstMessage, stations) {
     lastVirtualUpdateRef.current = lastVirtualUpdateRef.current || performance.now();
 
     let timeoutId;
-
+    const tickMs = bufferSizeSec == 30 ? 250 : 1000;
     const tick = () => {
       const now = performance.now();
       const elapsed = (now - lastVirtualUpdateRef.current) / 1000;
