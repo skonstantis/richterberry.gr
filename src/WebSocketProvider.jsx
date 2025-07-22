@@ -24,6 +24,7 @@ export function WebSocketProvider({ url, children, bufferSizeSec }) {
   const [gpsSynced, setGpsSynced] = useState(false);
   const [firstMessage, setFirstMessage] = useState(false);
   const [stations, setStations] = useState(null);
+  const [stationsMax, setStationsMax] = useState(null);
   const stationsRef = useRef(null);
 
   const { addBatch, buffer, virtualNow } = useBuffer(bufferSizeSec, firstMessage, stations);
@@ -115,7 +116,7 @@ export function WebSocketProvider({ url, children, bufferSizeSec }) {
           setStations([...stationsRef.current]);
         }
         if (stationsRef.current && data.type === "stations_max") {
-          console.log(data);
+          setStationsMax(data.stations_max);
         }
         if (data.type === "stations") {
           setStations(data.stations);
@@ -198,7 +199,8 @@ export function WebSocketProvider({ url, children, bufferSizeSec }) {
         buffer,
         virtualNow,
         isConnecting,
-        stations
+        stations, 
+        stationsMax
       }}
     >
       {children}

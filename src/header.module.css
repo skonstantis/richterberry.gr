@@ -117,10 +117,12 @@
   }
   
   .stationInfo {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 16px 1fr 16px; 
     align-items: center;
+    gap: 12px;
   }
+  
 
   .stationName {
     font-size: 14px;
