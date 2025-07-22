@@ -34,19 +34,10 @@ function Header() {
                     className={styles.dropdownItem}
                   >
                     <div className={styles.stationInfo}>
-                      <div
-                        style={{
-                          display: "inline-block",
-                          width: "12px",
-                          height: "12px",
-                          borderRadius: "2px",
-                          marginRight: "8px",
-                          backgroundColor: swatchColor,
-                          border: "1px solid #888",
-                          flexShrink: 0,
-                        }}
-                      ></div>
-
+                        <div
+                          className={styles.colorBox}
+                          style={{ backgroundColor: swatchColor }}
+                        ></div>
                       <div>
                         <div className={styles.stationName}>
                           {name.toUpperCase()}
