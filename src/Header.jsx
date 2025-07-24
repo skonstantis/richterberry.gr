@@ -13,6 +13,12 @@ function Header() {
         </Link>
       </div>
       <div className={styles.wrapperNav}>
+      <a href="/map" className={styles.link}>
+          MAP
+        </a>        
+        <a href="/panel" className={styles.link}>
+          PANEL
+        </a>
         <div className={styles.dropdown}>
           <div className={styles.link}>
             STATIONS
@@ -59,9 +65,6 @@ function Header() {
               })}
           </div>
         </div>
-        <a href="/panel" className={styles.link}>
-          PANEL
-        </a>
         <a href="/how-it-works" className={styles.link}>
           HOW IT WORKS
           <span className={styles.questionmark}></span>

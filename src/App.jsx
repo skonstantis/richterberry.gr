@@ -5,6 +5,7 @@ import Station from "./Station";
 import Panel from "./Panel";
 import HowItWorks from "./HowItWorks";
 import { WebSocketProvider } from "./WebSocketProvider";
+import Map from "./Map.jsx";
 
 function AppRoutes({bufferSizeSec, setBufferSizeSec}) {
   return (
@@ -12,6 +13,7 @@ function AppRoutes({bufferSizeSec, setBufferSizeSec}) {
       <Route path="/" element={<Navigate to="/prometheus" replace />} />
       <Route path="/how-it-works" element={<HowItWorks />} />
       <Route path="/panel" element={<Panel />} />
+      <Route path="/map" element={<Map />} />
       <Route path="*" element={<Station bufferSizeSec={bufferSizeSec} setBufferSizeSec={setBufferSizeSec}/>} />
     </Routes>
   );
