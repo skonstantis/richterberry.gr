@@ -54,6 +54,18 @@
   margin-right: 5px;
 }
 
+.onOfflinenIcon
+{
+  width: 21px;
+  margin-right: 5px;
+}
+
+.geophoneIcon
+{
+  width: 16px;
+  margin-right: 5px;
+}
+
 .modeTesting {
   background: #c49a00;
 }
@@ -87,6 +99,13 @@
   font-weight: 500;
   display: flex;
   align-items: center;
+}
+
+.piIcon
+{
+    background-color: #7bb661;
+      width: 22px;
+      margin-right: 5px;
 }
 
 .statusOnline {

@@ -128,6 +128,64 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
               </div>
             </div>
           </div>
+          
+          <div className={styles.row}>
+          <div
+              className={
+                styles.locationWrapper
+              }
+            >
+              <img
+                src={"./station.svg"}
+                alt="Station"
+                className={styles.stationIcon}
+              />
+              {info.pi}
+            </div>
+            <div
+              className={
+                styles.locationWrapper
+              }
+            >
+              <img
+                src={"./geophone.svg"}
+                alt="Geophone"
+                className={styles.geophoneIcon}
+              />
+              {info.geophones}
+              <div className={styles.tooltipWrapper}>
+                  <img
+                    src={"./questionmark.svg"}
+                    alt="Questionmark"
+                    className={styles.questionmarkIcon}
+                  />
+                  <div className={styles.tooltip}>
+                  <div className={styles.tooltipItem}>
+                  <span>
+  <strong>1</strong>
+  <br />
+  Contains a single vertical geophone<br />
+  for basic seismic monitoring
+  <br />
+  Useful for simple installations or dense arrays
+  <br />
+  <br />
+  <strong>3</strong>
+  <br />
+  Equipped with three orthogonally placed geophones<br />
+  to capture full 3D ground motion (Z, N-S, E-W)
+  <br />
+  Offers better resolution of wave direction<br />
+  and more accurate event characterization
+</span>
+</div>
+
+
+                  </div>
+                </div>
+            </div>
+            </div>
+
           <div className={styles.row}>
             <div
               className={
@@ -135,9 +193,9 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
               }
             >
               <img
-                src={"./station.svg"}
-                alt="Station"
-                className={styles.stationIcon}
+                src={info.connected ? "./online.svg" : "./offline.svg"}
+                alt="OnOffline"
+                className={styles.onOfflinenIcon}
               />
               {info.connected ? "Online" : "Offline"}
             </div>
@@ -185,6 +243,7 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
               </div>
             )}
           </div>
+          
           <div className={styles.row}>
             <div className={styles.stationWrapper}>
               {info.name.toUpperCase()}
