@@ -53,7 +53,7 @@ export function Panel() {
                 ? showColor
                   ? getJetColor(maxValue, 0, 1000)
                   : "transparent"
-                : "#000";
+                : "transparent"; 
 
               return (
                 <tr
