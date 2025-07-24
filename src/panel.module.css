@@ -1,0 +1,117 @@
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.panelTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  min-width: 600px; 
+  font-family: Arial, sans-serif;
+  color: white;
+}
+
+.panelTable thead tr {
+  background-color: #222;
+  text-align: center; 
+  user-select: none;
+}
+
+.panelTable thead th {
+  padding: 12px 20px;
+  font-weight: bold;
+  font-size: 16px;
+  border-bottom: 2px solid #444;
+  white-space: nowrap;
+}
+
+.stationRow {
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.stationRow:hover {
+  filter: brightness(1.1);
+}
+
+.stationRow td {
+  padding: 12px 20px;
+  vertical-align: middle;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.statusDot {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0,0,0,0.6);
+}
+
+.stationName {
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+}
+
+.location {
+  display: inline-flex;
+  align-items: center;
+  background: #c51a4a;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.locationIcon {
+  width: 12px;
+  margin-right: 6px;
+}
+
+.modeWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.modeIcon {
+  width: 16px;
+  margin-right: 6px;
+}
+
+.modeTesting {
+  background-color: #c49a00;
+}
+
+.modeDeployed {
+  background-color: #7bb661;
+}
+
+.modeMaintenance {
+  background-color: #b04a4a;
+}
+
+.panelTable th:first-child,
+.panelTable td:first-child {
+  padding-left: 24px; 
+}
+
+.panelTable th:last-child,
+.panelTable td:last-child {
+  padding-right: 24px;
+}
+
+@media (max-width: 600px) {
+  .panelTable {
+    min-width: 100%;
+  }
+}

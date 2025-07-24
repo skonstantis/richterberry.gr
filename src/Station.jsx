@@ -136,7 +136,7 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
             >
               <img
                 src={"./station.svg"}
-                alt="GPS"
+                alt="Station"
                 className={styles.stationIcon}
               />
               {info.connected ? "Online" : "Offline"}
@@ -150,30 +150,38 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
                 <img src={"./gps.svg"} alt="GPS" className={styles.gpsIcon} />
                 {info.connected ? "Synced" : "Unsynced"}
                 <div className={styles.tooltipWrapper}>
-                <img
-                  src={"./questionmark.svg"}
-                  alt="Questionmark"
-                  className={styles.questionmarkIcon}
-                />
-                <div className={styles.tooltip}>
-                  <div className={styles.tooltipItem}>
-                    <span>
-                      <strong>Synced</strong> 
-                      <br/>
-                      Station timestamps samples using GPS;<br /> Timestamps are extremely accurate
-                    </span>
-                  </div>
-                  <div className={styles.tooltipItem}>
-                    <span>
-                      <strong>Unsynced</strong>
-                      <br />Station timestamps samples using internal clock;<br /> Timestamps are less accurate
-                      <br />
-                      <br />
-                      <em>Data across all GPS-synced stations can be<br /> used to accurately calculate the parameters of an<br /> earthuake and compared weith other networks</em>
-                    </span>
+                  <img
+                    src={"./questionmark.svg"}
+                    alt="Questionmark"
+                    className={styles.questionmarkIcon}
+                  />
+                  <div className={styles.tooltip}>
+                    <div className={styles.tooltipItem}>
+                      <span>
+                        <strong>Synced</strong>
+                        <br />
+                        Station timestamps samples using GPS;
+                        <br /> Timestamps are extremely accurate
+                      </span>
+                    </div>
+                    <div className={styles.tooltipItem}>
+                      <span>
+                        <strong>Unsynced</strong>
+                        <br />
+                        Station timestamps samples using internal clock;
+                        <br /> Timestamps are less accurate
+                        <br />
+                        <br />
+                        <em>
+                          Data across all GPS-synced stations can be
+                          <br /> used to accurately calculate the parameters of
+                          an
+                          <br /> earthuake and compared weith other networks
+                        </em>
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
               </div>
             )}
           </div>
@@ -192,81 +200,88 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
       </div>
 
       <div className={styles.bufferControls}>
-            <div className={styles.buttonGroup}>
-              <button
-                className={`${styles.bufferButton} ${
-                  bufferSizeSec === 30 ? styles.active : ""
-                }`}
-                onClick={() => {
-                  setBufferSizeSec(30);
-                  localStorage.setItem("bufferSizeSec", "30");
-                }}
-              >
-                30s @ 250Hz
-              </button>
-              <button
-                className={`${styles.bufferButton} ${
-                  bufferSizeSec === 300 ? styles.active : ""
-                }`}
-                onClick={() => {
-                  setBufferSizeSec(300);
-                  localStorage.setItem("bufferSizeSec", "300");
-                }}
-              >
-                5m @ 50Hz
-              </button>
-              <div className={styles.tooltipWrapper}>
-                <img
-                  src={"./questionmark.svg"}
-                  alt="Questionmark"
-                  className={styles.questionmarkIcon}
-                />
-                <div className={styles.tooltip}>
-                  <div className={styles.tooltipItem}>
-                    <span>
-                      <strong>30s @ 250Hz</strong> 
-                      <br/>
-                      Short Duration<br /> High resolution
-                    </span>
-                  </div>
-                  <div className={styles.tooltipItem}>
-                    <span>
-                      <strong>5m @ 50Hz</strong>
-                      <br />Extended duration<br /> Medium resolution
-                      <br />
-                      <br />
-                      <em><strong>Spikes:</strong> Always 250Hz</em>
-                    </span>
-                  </div>
-                </div>
+        <div className={styles.buttonGroup}>
+          <button
+            className={`${styles.bufferButton} ${
+              bufferSizeSec === 30 ? styles.active : ""
+            }`}
+            onClick={() => {
+              setBufferSizeSec(30);
+              localStorage.setItem("bufferSizeSec", "30");
+            }}
+          >
+            30s @ 250Hz
+          </button>
+          <button
+            className={`${styles.bufferButton} ${
+              bufferSizeSec === 300 ? styles.active : ""
+            }`}
+            onClick={() => {
+              setBufferSizeSec(300);
+              localStorage.setItem("bufferSizeSec", "300");
+            }}
+          >
+            5m @ 50Hz
+          </button>
+          <div className={styles.tooltipWrapper}>
+            <img
+              src={"./questionmark.svg"}
+              alt="Questionmark"
+              className={styles.questionmarkIcon}
+            />
+            <div className={styles.tooltip}>
+              <div className={styles.tooltipItem}>
+                <span>
+                  <strong>30s @ 250Hz</strong>
+                  <br />
+                  Short Duration
+                  <br /> High resolution
+                </span>
+              </div>
+              <div className={styles.tooltipItem}>
+                <span>
+                  <strong>5m @ 50Hz</strong>
+                  <br />
+                  Extended duration
+                  <br /> Medium resolution
+                  <br />
+                  <br />
+                  <em>
+                    <strong>Spikes:</strong> Always 250Hz
+                  </em>
+                </span>
               </div>
             </div>
           </div>
+        </div>
+      </div>
       {buffer && buffer.length == 0 && (
-        <div className={styles.bufferEmpty}>Data will be displayed here when available...</div>
+        <div className={styles.bufferEmpty}>
+          Data will be displayed here when available...
+        </div>
       )}
       {buffer && buffer.length > 0 && (
         <>
           <div className={styles.inlineLabel}>
-  <span className={styles.title}>Amplitude Plot</span>
+            <span className={styles.title}>Amplitude Plot</span>
 
-  <div className={styles.tooltipWrapper}>
-    <img
-      src={"./questionmark.svg"}
-      alt="Questionmark"
-      className={styles.questionmarkIcon}
-    />
-    <div className={styles.tooltip}>
-  <div className={styles.tooltipItem}>
-    <em>
-      Look for sudden spikes in the graph
-      <br />Those usually indicate an earthquake 
-    </em>
-  </div>
-</div>
-
-  </div>
-</div>
+            <div className={styles.tooltipWrapper}>
+              <img
+                src={"./questionmark.svg"}
+                alt="Questionmark"
+                className={styles.questionmarkIcon}
+              />
+              <div className={styles.tooltip}>
+                <div className={styles.tooltipItem}>
+                  <em>
+                    Look for sudden spikes in the graph
+                    <br />
+                    Those usually indicate an earthquake
+                  </em>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className={styles.seismoPlotWrapper}>
             <SeismoPlot
@@ -276,27 +291,27 @@ function Station({ bufferSizeSec, setBufferSizeSec }) {
             />
           </div>
           <div className={styles.inlineLabel}>
-  <span className={styles.title}>Spectrogram</span>
+            <span className={styles.title}>Spectrogram</span>
 
-  <div className={styles.tooltipWrapper}>
-    <img
-      src={"./questionmark.svg"}
-      alt="Questionmark"
-      className={styles.questionmarkIcon}
-    />
-    <div className={styles.tooltip}>
-  <div className={styles.tooltipItem}>
-    <em>
-    Brighter red bands show stronger vibrations
-    <br />
-     at specific frequencies and times
-      <br />
-      Blue areas mean little or no activity
-    </em>
-  </div>
-</div>
-  </div>
-</div>
+            <div className={styles.tooltipWrapper}>
+              <img
+                src={"./questionmark.svg"}
+                alt="Questionmark"
+                className={styles.questionmarkIcon}
+              />
+              <div className={styles.tooltip}>
+                <div className={styles.tooltipItem}>
+                  <em>
+                    Brighter red bands show stronger vibrations
+                    <br />
+                    at specific frequencies and times
+                    <br />
+                    Blue areas mean little or no activity
+                  </em>
+                </div>
+              </div>
+            </div>
+          </div>
           <div className={styles.seismoPlotWrapper}>
             <Spectrogram
               buffer={buffer}

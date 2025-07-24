@@ -22,7 +22,7 @@ function Header() {
             {stations != null &&
               stations.map(({ name, id, location, connected }) => {
                 const maxValue = stationsMax?.[name.toLowerCase()];
-                const showColor = connected && maxValue != null;
+                const showColor = connected && (maxValue != 0 && maxValue != null);
                 const swatchColor = showColor
                   ? getJetColor(maxValue, 0, 1000)
                   : "transparent";
@@ -59,6 +59,9 @@ function Header() {
               })}
           </div>
         </div>
+        <a href="/panel" className={styles.link}>
+          PANEL
+        </a>
         <a href="/how-it-works" className={styles.link}>
           HOW IT WORKS
           <span className={styles.questionmark}></span>
